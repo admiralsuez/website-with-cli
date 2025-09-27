@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
   Dialog,
   DialogContent,
@@ -9,7 +10,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from './ui/scroll-area';
-import { Button } from './ui/button';
 import type { Project } from '@/lib/types';
 
 interface InteractiveTerminalProps {
@@ -95,7 +95,7 @@ export default function InteractiveTerminal({
         output = 'Enter password: ';
         break;
       case 'clear':
-        setHistory([]);
+        setHistory([initialMessage]);
         return;
       case 'date':
         output = new Date().toString();
@@ -105,7 +105,17 @@ export default function InteractiveTerminal({
         const projectsToList = showHidden ? projects : projects.filter(p => !p.hidden);
         output = (
           <ul className="list-disc pl-5">
-            {projectsToList.map(p => <li key={p.id}>{p.name}</li>)}
+            {projectsToList.map(p => (
+              <li key={p.id}>
+                <Link 
+                  href={`/projects/${p.id}`} 
+                  className="hover:underline"
+                  onClick={() => onOpenChange(false)}
+                >
+                  {p.name || 'Untitled Project'}
+                </Link>
+              </li>
+            ))}
           </ul>
         );
         break;
