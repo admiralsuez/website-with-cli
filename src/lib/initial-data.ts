@@ -44,5 +44,5 @@ export const initialTheme: Theme = {
   font: 'Space Grotesk',
   welcomeMessage: ' welcome-to-my-portfolio',
   prompt: 'user@cli-portfolio',
-  loadingCommand: 'ls projects',
+  loadingCommand: 'lss projects',
 };
