@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -35,7 +35,7 @@ export default function InteractiveTerminal({
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {
       const viewport = scrollAreaRef.current.querySelector(
         'div[data-radix-scroll-area-viewport]'
@@ -44,7 +44,7 @@ export default function InteractiveTerminal({
         viewport.scrollTop = viewport.scrollHeight;
       }
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -57,16 +57,16 @@ export default function InteractiveTerminal({
 
   useEffect(() => {
     scrollToBottom();
-  }, [history]);
+  }, [history, scrollToBottom]);
 
   const handleCommand = (command: string) => {
     let output: React.ReactNode;
-    const newHistory: CommandRecord[] = [...history, { command, output: '' }];
+    let newHistoryRecord: CommandRecord = { command, output: '' };
 
     switch (command.toLowerCase().trim()) {
       case 'help':
         output = (
-          <div>
+          <div className='text-xs'>
             <p>Available commands:</p>
             <ul className="list-disc pl-5">
               <li>help - Show this help message</li>
@@ -77,21 +77,21 @@ export default function InteractiveTerminal({
             </ul>
           </div>
         );
-        newHistory[newHistory.length - 1].output = output;
-        setHistory(newHistory);
+        newHistoryRecord.output = output;
+        setHistory((prev) => [...prev, newHistoryRecord]);
         break;
       case 'admin':
         setAwaitingPassword(true);
-        newHistory[newHistory.length - 1].output = 'Enter password: ';
-        setHistory(newHistory);
+        newHistoryRecord.output = 'Enter password: ';
+        setHistory((prev) => [...prev, newHistoryRecord]);
         return;
       case 'clear':
         setHistory([]);
         return;
       case 'date':
         output = new Date().toString();
-        newHistory[newHistory.length - 1].output = output;
-        setHistory(newHistory);
+        newHistoryRecord.output = output;
+        setHistory((prev) => [...prev, newHistoryRecord]);
         break;
       default:
         if (command.toLowerCase().startsWith('echo ')) {
@@ -99,8 +99,8 @@ export default function InteractiveTerminal({
         } else {
           output = `command not found: ${command}`;
         }
-        newHistory[newHistory.length - 1].output = output;
-        setHistory(newHistory);
+        newHistoryRecord.output = output;
+        setHistory((prev) => [...prev, newHistoryRecord]);
     }
   };
 
@@ -117,8 +117,15 @@ export default function InteractiveTerminal({
     setHistory((prev) => {
       const lastEntry = prev[prev.length - 1];
       if (lastEntry) {
-        lastEntry.command = `${lastEntry.command} ${'*'.repeat(password.length)}`;
-        lastEntry.output = <div>{output}</div>
+        // This is a bit of a hack to make it look like one line
+        lastEntry.output = (
+          <>
+            {lastEntry.output}
+            {'*'.repeat(password.length)}
+            <br />
+            {output}
+          </>
+        );
       }
       return [...prev];
     });
@@ -138,6 +145,7 @@ export default function InteractiveTerminal({
       }
     }
     setInput('');
+    setTimeout(scrollToBottom, 0);
   };
 
   return (
@@ -148,6 +156,10 @@ export default function InteractiveTerminal({
       >
         <DialogHeader className="p-4 border-b flex-row justify-between items-center">
           <DialogTitle>Interactive Terminal</DialogTitle>
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onOpenChange(false)}>
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
         </DialogHeader>
         <div
           className="flex-1 p-4 overflow-hidden"
@@ -161,8 +173,7 @@ export default function InteractiveTerminal({
                     <span className="text-primary font-bold">
                       [user@cli-portfolio ~]$
                     </span>
-                    <span>{item.command}</span>
-                    {index === history.length -1 && isAwaitingPassword && <BlinkingCursor/>}
+                    <span className='whitespace-pre-wrap'>{item.command}</span>
                   </div>
                   {item.output && (
                     <div className="text-foreground whitespace-pre-wrap">
@@ -171,36 +182,19 @@ export default function InteractiveTerminal({
                   )}
                 </div>
               ))}
-              {!isAwaitingPassword && (
-                <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                  <span className="text-primary font-bold">
-                    [user@cli-portfolio ~]$
-                  </span>
-                  <Input
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    type="text"
-                    className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
-                    autoComplete="off"
-                  />
-                </form>
-              )}
-               {isAwaitingPassword && (
-                <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                   <span className="text-primary font-bold">
-                    [user@cli-portfolio ~]$
-                  </span>
-                  <Input
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    type="password"
-                    className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
-                    autoComplete="off"
-                  />
-                </form>
-              )}
+              <form onSubmit={handleSubmit} className="flex items-center gap-2">
+                <span className="text-primary font-bold">
+                  [user@cli-portfolio ~]$
+                </span>
+                <Input
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  type={isAwaitingPassword ? 'password' : 'text'}
+                  className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                  autoComplete="off"
+                />
+              </form>
             </div>
           </ScrollArea>
         </div>

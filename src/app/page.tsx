@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import AdminPanel from '@/components/admin-panel';
 import BlinkingCursor from '@/components/blinking-cursor';
@@ -81,44 +82,33 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {projects.map((project) => (
-                <Card key={project.id} className="bg-card/50 hover:bg-card/90 transition-colors flex flex-col">
-                  <CardHeader className="p-4">
-                    <CardTitle className="text-primary text-base sm:text-lg">{project.name}</CardTitle>
-                    <CardDescription className="font-code text-xs pt-1">
-                      <span className="text-foreground">TECH:</span> {project.techStack}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-0 flex-1 flex flex-col gap-4">
-                    {project.imageUrl && (
-                       <div className="aspect-video relative overflow-hidden rounded-md">
-                         <Image 
-                           src={project.imageUrl} 
-                           alt={project.name} 
-                           fill
-                           className="object-cover"
-                           data-ai-hint="screenshot app"
-                         />
-                       </div>
-                    )}
-                    <p className="text-xs sm:text-sm">{project.description}</p>
-                  </CardContent>
-                  <CardFooter className="p-4 pt-0 flex gap-4">
-                    {project.repoUrl && (
-                      <Button asChild variant="link" className="p-0 h-auto text-foreground text-xs sm:text-sm">
-                        <a href={project.repoUrl} target="_blank" rel="noopener noreferrer">
-                          [repository]
-                        </a>
-                      </Button>
-                    )}
-                    {project.liveUrl && (
-                      <Button asChild variant="link" className="p-0 h-auto text-foreground text-xs sm:text-sm">
-                        <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">
-                          [live_demo]
-                        </a>
-                      </Button>
-                    )}
-                  </CardFooter>
-                </Card>
+                <Link href={`/projects/${project.id}`} key={project.id} className="no-underline">
+                  <Card className="bg-card/50 hover:bg-card/90 transition-colors flex flex-col h-full">
+                    <CardHeader className="p-4">
+                      <CardTitle className="text-primary text-base sm:text-lg">{project.name}</CardTitle>
+                      <CardDescription className="font-code text-xs pt-1">
+                        <span className="text-foreground">TECH:</span> {project.techStack}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-4 pt-0 flex-1 flex flex-col gap-4">
+                      {project.imageUrl && (
+                         <div className="aspect-video relative overflow-hidden rounded-md">
+                           <Image 
+                             src={project.imageUrl} 
+                             alt={project.name} 
+                             fill
+                             className="object-cover"
+                             data-ai-hint="screenshot app"
+                           />
+                         </div>
+                      )}
+                      <p className="text-xs sm:text-sm line-clamp-3">{project.description}</p>
+                    </CardContent>
+                    <CardFooter className="p-4 pt-0 mt-auto flex gap-4">
+                      <span className="text-foreground text-xs sm:text-sm">[view_project]</span>
+                    </CardFooter>
+                  </Card>
+                </Link>
               ))}
             </div>
           </div>
