@@ -79,10 +79,10 @@ export default function Home() {
           <div className="space-y-6">
             <div className="flex items-center gap-2">
               <span className="text-primary font-bold">[user@cli-portfolio ~]$</span>
-              <h2 className="text-lg sm:text-xl font-bold font-headline">ls -a projects</h2>
+              <h2 className="text-lg sm:text-xl font-bold font-headline">ls projects</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              {projects.map((project) => (
+              {projects.filter(p => !p.hidden).map((project) => (
                 <Link href={`/projects/${project.id}`} key={project.id} className="no-underline">
                   <Card className="bg-card/50 hover:bg-card/90 transition-colors flex flex-col h-full">
                     <CardHeader className="p-4">
@@ -119,7 +119,7 @@ export default function Home() {
           className="p-4 border-t flex items-center justify-between"
         >
           <div 
-            className="flex items-center gap-2 text-xs sm:text-sm cursor-pointer"
+            className="flex items-center gap-2 text-xs sm:text-sm cursor-pointer flex-1"
             onClick={() => setTerminalOpen(true)}
           >
             <span className="text-primary font-bold">
@@ -127,6 +127,10 @@ export default function Home() {
             </span>
             <BlinkingCursor />
           </div>
+          <Button variant="ghost" size="icon" onClick={() => setPanelOpen(true)} className="h-8 w-8">
+            <Cog className="h-4 w-4" />
+            <span className="sr-only">Open Admin Panel</span>
+          </Button>
         </footer>
       </CliContainer>
 
@@ -142,6 +146,7 @@ export default function Home() {
         isOpen={isTerminalOpen}
         onOpenChange={setTerminalOpen}
         openAdminPanel={() => setPanelOpen(true)}
+        projects={projects}
       />
     </div>
   );

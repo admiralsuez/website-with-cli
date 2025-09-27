@@ -6,6 +6,7 @@ export type Project = {
   liveUrl?: string;
   repoUrl?: string;
   imageUrl?: string;
+  hidden?: boolean;
 };
 
 export type Theme = {

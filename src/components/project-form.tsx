@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from './ui/checkbox';
 
 const projectSchema = z.object({
   name: z.string().optional(),
@@ -24,6 +25,7 @@ const projectSchema = z.object({
   liveUrl: z.string().url().optional().or(z.literal('')),
   repoUrl: z.string().url().optional().or(z.literal('')),
   imageUrl: z.string().url().optional().or(z.literal('')),
+  hidden: z.boolean().optional(),
 });
 
 type ProjectFormValues = z.infer<typeof projectSchema>;
@@ -43,6 +45,7 @@ export default function ProjectForm({ project, onSave }: ProjectFormProps) {
       liveUrl: project?.liveUrl ?? '',
       repoUrl: project?.repoUrl ?? '',
       imageUrl: project?.imageUrl ?? '',
+      hidden: project?.hidden ?? false,
     },
   });
 
@@ -137,6 +140,28 @@ export default function ProjectForm({ project, onSave }: ProjectFormProps) {
                 <Input placeholder="https://github.com/user/repo" {...field} />
               </FormControl>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="hidden"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+               <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel>
+                  Hide Project
+                </FormLabel>
+                <FormDescription>
+                  Hidden projects will not appear on the main page, but can be viewed with `ls -a` in the terminal.
+                </FormDescription>
+              </div>
             </FormItem>
           )}
         />

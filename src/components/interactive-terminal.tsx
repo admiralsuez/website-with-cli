@@ -11,11 +11,13 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from './ui/scroll-area';
 import { Button } from './ui/button';
 import { X } from 'lucide-react';
+import type { Project } from '@/lib/types';
 
 interface InteractiveTerminalProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   openAdminPanel: () => void;
+  projects: Project[];
 }
 
 type CommandRecord = {
@@ -28,11 +30,17 @@ export default function InteractiveTerminal({
   isOpen,
   onOpenChange,
   openAdminPanel,
+  projects,
 }: InteractiveTerminalProps) {
   const [history, setHistory] = useState<CommandRecord[]>([]);
   const [input, setInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const initialMessage: CommandRecord = {
+    command: '',
+    output: 'Welcome to the interactive terminal. Type "help" for a list of commands.',
+  };
 
   const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {
@@ -48,7 +56,7 @@ export default function InteractiveTerminal({
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
-      setHistory([]);
+      setHistory([initialMessage]);
       setInput('');
     }
   }, [isOpen]);
@@ -64,7 +72,10 @@ export default function InteractiveTerminal({
     let output: React.ReactNode;
     let isPasswordPrompt = false;
 
-    switch (command.toLowerCase().trim()) {
+    const commandParts = command.toLowerCase().trim().split(' ');
+    const mainCommand = commandParts[0];
+
+    switch (mainCommand) {
       case 'help':
         output = (
           <div className="text-xs">
@@ -72,6 +83,8 @@ export default function InteractiveTerminal({
             <ul className="list-disc pl-5">
               <li>help - Show this help message</li>
               <li>admin - Open the admin panel (requires password)</li>
+              <li>ls - List visible projects</li>
+              <li>ls -a - List all projects including hidden ones</li>
               <li>clear - Clear the terminal history</li>
               <li>date - Display the current date</li>
               <li>echo [text] - Print text to the terminal</li>
@@ -89,8 +102,17 @@ export default function InteractiveTerminal({
       case 'date':
         output = new Date().toString();
         break;
+      case 'ls':
+        const showHidden = commandParts.includes('-a');
+        const projectsToList = showHidden ? projects : projects.filter(p => !p.hidden);
+        output = (
+          <ul className="list-disc pl-5">
+            {projectsToList.map(p => <li key={p.id}>{p.name}</li>)}
+          </ul>
+        );
+        break;
       default:
-        if (command.toLowerCase().startsWith('echo ')) {
+        if (mainCommand === 'echo') {
           output = command.substring(5);
         } else {
           output = `command not found: ${command}`;
@@ -170,12 +192,14 @@ export default function InteractiveTerminal({
             <div className="font-code text-sm">
               {history.map((item, index) => (
                 <div key={index}>
-                  <div className="flex items-center gap-2">
-                    <span className="text-primary font-bold">
-                      [user@cli-portfolio ~]$
-                    </span>
-                    <span className='whitespace-pre-wrap'>{item.command}</span>
-                  </div>
+                 {item.command && (
+                    <div className="flex items-center gap-2">
+                        <span className="text-primary font-bold">
+                        [user@cli-portfolio ~]$
+                        </span>
+                        <span className='whitespace-pre-wrap'>{item.command}</span>
+                    </div>
+                  )}
                   {item.output && (
                     <div className="text-foreground whitespace-pre-wrap">
                       {item.output}
