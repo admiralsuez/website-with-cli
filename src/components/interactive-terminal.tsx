@@ -10,7 +10,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from './ui/scroll-area';
 import { Button } from './ui/button';
-import { X } from 'lucide-react';
 import type { Project } from '@/lib/types';
 
 interface InteractiveTerminalProps {
@@ -84,7 +83,6 @@ export default function InteractiveTerminal({
               <li>help - Show this help message</li>
               <li>admin - Open the admin panel (requires password)</li>
               <li>ls - List visible projects</li>
-              <li>ls -a - List all projects including hidden ones</li>
               <li>clear - Clear the terminal history</li>
               <li>date - Display the current date</li>
               <li>echo [text] - Print text to the terminal</li>
@@ -177,12 +175,8 @@ export default function InteractiveTerminal({
         className="w-[90vw] max-w-3xl h-[60vh] flex flex-col p-0"
         onInteractOutside={(e) => e.preventDefault()}
       >
-        <DialogHeader className="p-4 border-b flex-row justify-between items-center">
+        <DialogHeader className="p-4 border-b">
           <DialogTitle>Interactive Terminal</DialogTitle>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onOpenChange(false)}>
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </Button>
         </DialogHeader>
         <div
           className="flex-1 p-4 overflow-hidden"
