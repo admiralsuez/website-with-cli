@@ -80,7 +80,7 @@ export default function AdminPanel({
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-2xl lg:max-w-3xl flex flex-col">
+      <SheetContent className="w-full max-w-none sm:max-w-2xl md:max-w-3xl lg:max-w-4xl flex flex-col">
         <SheetHeader>
           <SheetTitle>Admin Panel</SheetTitle>
           <SheetDescription>
