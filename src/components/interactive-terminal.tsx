@@ -57,19 +57,19 @@ export default function InteractiveTerminal({
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
-      if (history.length === 0 || (history.length === 1 && history[0] === initialMessage)) {
+      if (history.length === 0 || (history.length === 1 && history[0].command === '' && history[0].output === initialMessage.output)) {
         setHistory([initialMessage]);
       }
       setInput('');
     }
-  }, [isOpen, history]);
+  }, [isOpen, history.length, initialMessage.output]);
 
   useEffect(() => {
     scrollToBottom();
   }, [history, scrollToBottom]);
 
   const lastCommand = history[history.length - 1];
-  const isAwaitingPassword = lastCommand?.isPasswordPrompt && !lastCommand.command.includes('\n');
+  const isAwaitingPassword = lastCommand?.isPasswordPrompt;
   const cliPrompt = prompt || 'user@cli-portfolio';
 
   const handleCommand = (command: string) => {
@@ -98,9 +98,10 @@ export default function InteractiveTerminal({
       case 'admin':
         isPasswordPrompt = true;
         output = 'Enter password: ';
-        break;
+        setHistory((prev) => [...prev, { command, output, isPasswordPrompt }]);
+        return;
       case 'clear':
-        setHistory([]);
+        setHistory([initialMessage]);
         return;
       case 'date':
         output = new Date().toString();
@@ -127,13 +128,13 @@ export default function InteractiveTerminal({
       default:
         if (mainCommand === 'echo') {
           output = command.substring(5);
-        } else {
+        } else if (command) {
           output = `command not found: ${command}`;
         }
     }
-    setHistory((prev) => [...prev, { command, output, isPasswordPrompt }]);
+    setHistory((prev) => [...prev, { command, output }]);
   };
-
+  
   const handlePassword = (password: string) => {
     let output: React.ReactNode;
     if (password === 'rooted@89') {
@@ -148,7 +149,6 @@ export default function InteractiveTerminal({
         const newHistory = [...prev];
         const lastEntry = newHistory[newHistory.length - 1];
         if (lastEntry) {
-            // Append password and result to the last command output
             lastEntry.output = (
                 <>
                     {lastEntry.output}
@@ -157,7 +157,6 @@ export default function InteractiveTerminal({
                     {output}
                 </>
             );
-            // Mark as not a password prompt anymore
             lastEntry.isPasswordPrompt = false; 
         }
         return newHistory;
@@ -171,11 +170,7 @@ export default function InteractiveTerminal({
     if (isAwaitingPassword) {
       handlePassword(commandToProcess);
     } else {
-      if (commandToProcess) {
-        handleCommand(commandToProcess);
-      } else {
-        setHistory((prev) => [...prev, { command: '', output: '' }]);
-      }
+      handleCommand(commandToProcess);
     }
     setInput('');
     setTimeout(() => {
@@ -188,7 +183,9 @@ export default function InteractiveTerminal({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
         className="w-[90vw] max-w-3xl h-[60vh] flex flex-col p-0"
-        onInteractOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => {
+            // e.preventDefault()
+        }}
       >
         <DialogHeader className="p-4 border-b">
           <DialogTitle>Interactive Terminal</DialogTitle>
@@ -201,38 +198,40 @@ export default function InteractiveTerminal({
             <div className="font-code text-sm">
               {history.map((item, index) => (
                 <div key={index}>
-                 {item.command && (
+                 {(item.command || item.isPasswordPrompt) && (
                     <div className="flex items-center gap-2">
                         <span className="text-primary font-bold">
                         [{cliPrompt} ~]$
                         </span>
-                        <span className='whitespace-pre-wrap'>{item.command}</span>
+                        <div className='whitespace-pre-wrap flex items-center gap-1'>
+                            <span>{item.command}</span>
+                            {item.isPasswordPrompt && (
+                                <>
+                                <span>{item.output}</span>
+                                 <form onSubmit={handleSubmit} className="inline-flex items-center gap-2">
+                                    <Input
+                                        ref={inputRef}
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        type="password"
+                                        className="inline-block w-32 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                                        autoComplete="off"
+                                        autoFocus
+                                    />
+                                </form>
+                                </>
+                            )}
+                        </div>
                     </div>
                   )}
-                  {item.output && (
+                  {!item.isPasswordPrompt && item.output && (
                     <div className="text-foreground whitespace-pre-wrap">
                       {item.output}
                     </div>
                   )}
                 </div>
               ))}
-                {isAwaitingPassword ? (
-                    <div className="flex items-center gap-2">
-                        <span className="text-primary font-bold">[{cliPrompt} ~]$</span>
-                        <span>{history[history.length -1]?.output}</span>
-                         <form onSubmit={handleSubmit} className="inline-flex items-center gap-2">
-                            <Input
-                                ref={inputRef}
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                type="password"
-                                className="inline-block w-32 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
-                                autoComplete="off"
-                                autoFocus
-                            />
-                        </form>
-                    </div>
-                ) : (
+                {!isAwaitingPassword && (
                     <form onSubmit={handleSubmit} className="flex items-center gap-2">
                         <span className="text-primary font-bold">
                         [{cliPrompt} ~]$
