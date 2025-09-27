@@ -60,46 +60,46 @@ export default function Home() {
   }
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-4 md:p-8 flex items-center justify-center min-h-screen">
       <CliContainer>
-        <main className="flex-1 p-6 space-y-8 overflow-y-auto">
+        <main className="flex-1 p-4 md:p-6 space-y-8 overflow-y-auto">
           <div className="flex items-center gap-2">
             <span className="text-primary font-bold hidden sm:inline">
               [user@cli-portfolio ~]$
             </span>
             <Typewriter
               text=" welcome-to-my-portfolio"
-              className="font-headline text-2xl"
+              className="font-headline text-lg sm:text-2xl"
             />
           </div>
 
           <div className="space-y-6">
             <div className="flex items-center gap-2">
               <span className="text-primary font-bold">[user@cli-portfolio ~]$</span>
-              <h2 className="text-xl font-bold font-headline">ls -a projects</h2>
+              <h2 className="text-lg sm:text-xl font-bold font-headline">ls -a projects</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {projects.map((project) => (
                 <Card key={project.id} className="bg-card/50 hover:bg-card/90 transition-colors">
-                  <CardHeader>
-                    <CardTitle className="text-primary">{project.name}</CardTitle>
+                  <CardHeader className="p-4">
+                    <CardTitle className="text-primary text-base sm:text-lg">{project.name}</CardTitle>
                     <CardDescription className="font-code text-xs pt-1">
                       <span className="text-foreground">TECH:</span> {project.techStack}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm">{project.description}</p>
+                  <CardContent className="p-4 pt-0">
+                    <p className="text-xs sm:text-sm">{project.description}</p>
                   </CardContent>
-                  <CardFooter className="flex gap-4">
+                  <CardFooter className="p-4 pt-0 flex gap-4">
                     {project.repoUrl && (
-                      <Button asChild variant="link" className="p-0 h-auto text-foreground">
+                      <Button asChild variant="link" className="p-0 h-auto text-foreground text-xs sm:text-sm">
                         <a href={project.repoUrl} target="_blank" rel="noopener noreferrer">
                           [repository]
                         </a>
                       </Button>
                     )}
                     {project.liveUrl && (
-                      <Button asChild variant="link" className="p-0 h-auto text-foreground">
+                      <Button asChild variant="link" className="p-0 h-auto text-foreground text-xs sm:text-sm">
                         <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">
                           [live_demo]
                         </a>
@@ -116,7 +116,7 @@ export default function Home() {
           className="p-4 border-t cursor-pointer"
           onClick={() => setTerminalOpen(true)}
         >
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-xs sm:text-sm">
             <span className="text-primary font-bold">
               [user@cli-portfolio ~]$
             </span>

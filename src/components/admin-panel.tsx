@@ -15,7 +15,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from './ui/dialog';
 import ProjectForm from './project-form';
 import ThemeForm from './theme-form';
@@ -81,7 +80,7 @@ export default function AdminPanel({
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl flex flex-col">
+      <SheetContent className="w-[90vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl flex flex-col">
         <SheetHeader>
           <SheetTitle>Admin Panel</SheetTitle>
           <SheetDescription>
@@ -93,33 +92,34 @@ export default function AdminPanel({
             <TabsTrigger value="projects">Projects</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
           </TabsList>
-          <TabsContent value="projects" className="flex-1 flex flex-col gap-4 min-h-0">
-            <div className="flex justify-between items-center">
+          <TabsContent value="projects" className="flex-1 flex flex-col gap-4 pt-4 min-h-0">
+            <div className="flex justify-between items-center px-1">
               <h3 className="text-lg font-medium">Manage Projects</h3>
               <Button onClick={handleAddProject} size="sm">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Project
               </Button>
             </div>
-            <ScrollArea className="flex-1 border rounded-md">
-                <div className="p-4 space-y-4">
+            <ScrollArea className="flex-1 -mx-6">
+                <div className="px-6 space-y-4">
               {projects.map((project) => (
                 <div
                   key={project.id}
                   className="flex items-center justify-between p-3 rounded-md bg-secondary"
                 >
-                  <span className="font-semibold">{project.name}</span>
+                  <span className="font-semibold text-sm">{project.name}</span>
                   <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleEditProject(project)}
+                      className="h-8 w-8"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive h-8 w-8">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
@@ -148,11 +148,13 @@ export default function AdminPanel({
               </div>
             </ScrollArea>
           </TabsContent>
-          <TabsContent value="appearance">
-            <ThemeForm
-              currentTheme={currentTheme}
-              onThemeChange={onThemeChange}
-            />
+          <TabsContent value="appearance" className="flex-1 overflow-y-auto -mx-6">
+            <div className="px-6">
+              <ThemeForm
+                currentTheme={currentTheme}
+                onThemeChange={onThemeChange}
+              />
+            </div>
           </TabsContent>
         </Tabs>
       </SheetContent>
