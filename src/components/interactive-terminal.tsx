@@ -111,10 +111,6 @@ export default function InteractiveTerminal({
       >
         <DialogHeader className="p-4 border-b flex-row justify-between items-center">
           <DialogTitle>Interactive Terminal</DialogTitle>
-           <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-6 w-6">
-              <X className="h-4 w-4"/>
-              <span className="sr-only">Close</span>
-            </Button>
         </DialogHeader>
         <div className="flex-1 p-4 overflow-hidden" onClick={() => inputRef.current?.focus()}>
            <ScrollArea className="h-full" ref={scrollAreaRef}>
