@@ -16,4 +16,5 @@ export type Theme = {
   font: string;
   welcomeMessage?: string;
   prompt?: string;
+  loadingCommand?: string;
 };

@@ -11,6 +11,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from './ui/scroll-area';
 import type { Project } from '@/lib/types';
+import BlinkingCursor from './blinking-cursor';
 
 interface InteractiveTerminalProps {
   isOpen: boolean;
@@ -97,8 +98,8 @@ export default function InteractiveTerminal({
         break;
       case 'admin':
         isPasswordPrompt = true;
-        output = 'Enter password: ';
-        setHistory((prev) => [...prev, { command, output, isPasswordPrompt }]);
+        output = 'Enter password:';
+        setHistory((prev) => [...prev, { command, output: '', isPasswordPrompt: false }, { command: '', output, isPasswordPrompt }]);
         return;
       case 'clear':
         setHistory([initialMessage]);
@@ -151,7 +152,6 @@ export default function InteractiveTerminal({
         if (lastEntry) {
             lastEntry.output = (
                 <>
-                    {lastEntry.output}
                     {'*'.repeat(password.length)}
                     <br />
                     {output}
@@ -198,54 +198,48 @@ export default function InteractiveTerminal({
             <div className="font-code text-sm">
               {history.map((item, index) => (
                 <div key={index}>
-                 {(item.command || item.isPasswordPrompt) && (
+                  {item.command && (
                     <div className="flex items-center gap-2">
                         <span className="text-primary font-bold">
                         [{cliPrompt} ~]$
                         </span>
-                        <div className='whitespace-pre-wrap flex items-center gap-1'>
-                            <span>{item.command}</span>
-                            {item.isPasswordPrompt && (
-                                <>
-                                <span>{item.output}</span>
-                                 <form onSubmit={handleSubmit} className="inline-flex items-center gap-2">
-                                    <Input
-                                        ref={inputRef}
-                                        value={input}
-                                        onChange={(e) => setInput(e.target.value)}
-                                        type="password"
-                                        className="inline-block w-32 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
-                                        autoComplete="off"
-                                        autoFocus
-                                    />
-                                </form>
-                                </>
-                            )}
-                        </div>
+                        <span>{item.command}</span>
                     </div>
                   )}
-                  {!item.isPasswordPrompt && item.output && (
+                  {item.output && (
                     <div className="text-foreground whitespace-pre-wrap">
-                      {item.output}
+                      {item.isPasswordPrompt ? (
+                        <>
+                          {'*'.repeat(input.length)}
+                          <br/>
+                          {item.output}
+                        </>
+                      ) : (
+                        item.output
+                      )}
                     </div>
                   )}
                 </div>
               ))}
-                {!isAwaitingPassword && (
-                    <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                        <span className="text-primary font-bold">
-                        [{cliPrompt} ~]$
-                        </span>
-                    <Input
-                        ref={inputRef}
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        type='text'
-                        className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
-                        autoComplete="off"
-                    />
-                    </form>
-                )}
+               <form onSubmit={handleSubmit} className="flex items-center gap-2">
+                  {isAwaitingPassword ? (
+                    <>
+                      <span>Enter password: </span>
+                    </>
+                  ) : (
+                    <span className="text-primary font-bold">
+                      [{cliPrompt} ~]$
+                    </span>
+                  )}
+                  <Input
+                      ref={inputRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      type={isAwaitingPassword ? 'password' : 'text'}
+                      className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                      autoComplete="off"
+                  />
+               </form>
             </div>
           </ScrollArea>
         </div>

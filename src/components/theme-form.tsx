@@ -25,6 +25,7 @@ const themeSchema = z.object({
   font: z.string().min(1, 'Font is required'),
   welcomeMessage: z.string().optional(),
   prompt: z.string().optional(),
+  loadingCommand: z.string().optional(),
 });
 
 type ThemeFormValues = z.infer<typeof themeSchema>;
@@ -73,6 +74,22 @@ export default function ThemeForm({
                     </FormControl>
                     <FormDescription>
                       The text to display in the typewriter animation on the main page.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="loadingCommand"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Loading Command</FormLabel>
+                    <FormControl>
+                      <Input placeholder="ls projects" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      The command to display after the welcome message.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

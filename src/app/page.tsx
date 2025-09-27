@@ -109,7 +109,7 @@ export default function Home() {
               <div className="flex items-center gap-2">
                 <span className="text-primary font-bold">[{cliPrompt} ~]$</span>
                 <Typewriter 
-                  text="ls projects" 
+                  text={theme.loadingCommand || "ls projects"}
                   className="text-lg sm:text-xl font-bold font-headline"
                   onComplete={handleCommandComplete}
                   speed={70}
