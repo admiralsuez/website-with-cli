@@ -1,55 +1,132 @@
-'use server';
+'use client';
 
-/**
- * @fileOverview Provides AI-driven theme suggestions for the portfolio based on a given theme.
- *
- * - suggestTheme - A function that generates theme suggestions.
- * - ThemeSuggestionInput - The input type for the suggestTheme function.
- * - ThemeSuggestionOutput - The return type for the suggestTheme function.
- */
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import type { Theme } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-
-const ThemeSuggestionInputSchema = z.object({
-  theme: z.string().describe('A general theme for the portfolio, e.g., futuristic, minimalist.'),
+const themeSchema = z.object({
+  backgroundColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex code'),
+  primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex code'),
+  accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex code'),
+  font: z.string().min(1, 'Font is required'),
 });
-export type ThemeSuggestionInput = z.infer<typeof ThemeSuggestionInputSchema>;
 
-const ThemeSuggestionOutputSchema = z.object({
-  primaryColor: z.string().describe('The suggested primary color in hex code.'),
-  backgroundColor: z.string().describe('The suggested background color in hex code.'),
-  accentColor: z.string().describe('The suggested accent color in hex code.'),
-  font: z.string().describe('The suggested font family.'),
-});
-export type ThemeSuggestionOutput = z.infer<typeof ThemeSuggestionOutputSchema>;
+type ThemeFormValues = z.infer<typeof themeSchema>;
 
-export async function suggestTheme(input: ThemeSuggestionInput): Promise<ThemeSuggestionOutput> {
-  return suggestThemeFlow(input);
+interface ThemeFormProps {
+  currentTheme: Theme;
+  onThemeChange: (theme: Theme) => void;
 }
 
-const prompt = ai.definePrompt({
-  name: 'themeSuggestionPrompt',
-  input: {schema: ThemeSuggestionInputSchema},
-  output: {schema: ThemeSuggestionOutputSchema},
-  prompt: `You are a UI/UX design expert. You are tasked with suggesting a color scheme and font pairing for a portfolio website based on a given theme.
+export default function ThemeForm({
+  currentTheme,
+  onThemeChange,
+}: ThemeFormProps) {
+  const { toast } = useToast();
 
-  Given the following theme: {{{theme}}}
+  const form = useForm<ThemeFormValues>({
+    resolver: zodResolver(themeSchema),
+    defaultValues: currentTheme,
+  });
 
-  Suggest a primary color, background color, accent color, and font that would be suitable for the portfolio.
+  const onSubmit = (data: ThemeFormValues) => {
+    onThemeChange(data);
+    toast({
+      title: 'Theme Updated',
+      description: 'Your new theme has been applied.',
+    });
+  };
 
-  Please provide the primary color, background color, and accent color in hex code.
-`,
-});
+  return (
+    <div className="space-y-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Customize Theme</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="backgroundColor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Background Color</FormLabel>
+                      <FormControl>
+                        <Input type="color" {...field} className='p-1 h-10'/>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="primaryColor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Primary Color</FormLabel>
+                      <FormControl>
+                        <Input type="color" {...field} className='p-1 h-10'/>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="accentColor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Accent Color</FormLabel>
+                      <FormControl>
+                        <Input type="color" {...field} className='p-1 h-10'/>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormDescription>
+                Primary color is used for cards and containers. Accent color is for text and interactive elements.
+              </FormDescription>
 
-const suggestThemeFlow = ai.defineFlow(
-  {
-    name: 'suggestThemeFlow',
-    inputSchema: ThemeSuggestionInputSchema,
-    outputSchema: ThemeSuggestionOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
-  }
-);
+              <FormField
+                control={form.control}
+                name="font"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Font Family</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Space Grotesk" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Enter a font name from Google Fonts. Page reload may be required.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit">Save Theme</Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

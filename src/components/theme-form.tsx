@@ -15,11 +15,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import type { Theme } from '@/lib/types';
-import { Separator } from './ui/separator';
-import { Wand2 } from 'lucide-react';
-import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { suggestTheme } from '@/ai/flows/ai-theme-suggestion';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 const themeSchema = z.object({
@@ -40,8 +36,6 @@ export default function ThemeForm({
   currentTheme,
   onThemeChange,
 }: ThemeFormProps) {
-  const [aiTheme, setAiTheme] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<ThemeFormValues>({
@@ -55,38 +49,6 @@ export default function ThemeForm({
       title: 'Theme Updated',
       description: 'Your new theme has been applied.',
     });
-  };
-
-  const handleSuggestTheme = async () => {
-    if (!aiTheme) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing Theme',
-        description: 'Please enter a theme idea to get suggestions.',
-      });
-      return;
-    }
-    setIsGenerating(true);
-    try {
-      const result = await suggestTheme({ theme: aiTheme });
-      form.setValue('backgroundColor', result.backgroundColor, { shouldValidate: true });
-      form.setValue('primaryColor', result.primaryColor, { shouldValidate: true });
-      form.setValue('accentColor', result.accentColor, { shouldValidate: true });
-      form.setValue('font', result.font, { shouldValidate: true });
-      toast({
-        title: 'Theme Suggested!',
-        description: 'New theme values have been populated in the form. Save to apply.',
-      });
-    } catch (error) {
-      console.error('Failed to suggest theme:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Suggestion Failed',
-        description: 'Could not generate a theme at this time.',
-      });
-    } finally {
-      setIsGenerating(false);
-    }
   };
 
   return (
@@ -163,30 +125,6 @@ export default function ThemeForm({
               <Button type="submit">Save Theme</Button>
             </form>
           </Form>
-        </CardContent>
-      </Card>
-      
-      <Separator />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>AI Theme Suggestion</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder="e.g., futuristic, minimalist, retro"
-              value={aiTheme}
-              onChange={(e) => setAiTheme(e.target.value)}
-            />
-            <Button onClick={handleSuggestTheme} disabled={isGenerating}>
-              <Wand2 className={`mr-2 h-4 w-4 ${isGenerating ? 'animate-pulse' : ''}`} />
-              Suggest
-            </Button>
-          </div>
-          <FormDescription>
-            Let AI suggest a color scheme and font for your portfolio based on a theme.
-          </FormDescription>
         </CardContent>
       </Card>
     </div>

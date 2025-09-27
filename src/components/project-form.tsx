@@ -15,10 +15,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Wand2 } from 'lucide-react';
-import { useState } from 'react';
-import { generateProjectDescription } from '@/ai/flows/generate-project-description';
-import { useToast } from '@/hooks/use-toast';
 
 const projectSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
@@ -36,9 +32,6 @@ interface ProjectFormProps {
 }
 
 export default function ProjectForm({ project, onSave }: ProjectFormProps) {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const { toast } = useToast();
-
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
@@ -55,33 +48,6 @@ export default function ProjectForm({ project, onSave }: ProjectFormProps) {
       id: project?.id ?? new Date().getTime().toString(),
       ...data,
     });
-  };
-
-  const handleGenerateDescription = async () => {
-    const projectName = form.getValues('name');
-    const techStack = form.getValues('techStack');
-    if (!projectName || !techStack) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing Information',
-        description: 'Please provide a project name and tech stack to generate a description.',
-      });
-      return;
-    }
-    setIsGenerating(true);
-    try {
-      const result = await generateProjectDescription({ projectName, techStack });
-      form.setValue('description', result.description, { shouldValidate: true });
-    } catch (error) {
-      console.error('Failed to generate description:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Generation Failed',
-        description: 'Could not generate a description at this time.',
-      });
-    } finally {
-      setIsGenerating(false);
-    }
   };
 
   return (
@@ -127,16 +93,6 @@ export default function ProjectForm({ project, onSave }: ProjectFormProps) {
                     {...field}
                   />
                 </FormControl>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute bottom-2 right-2"
-                  onClick={handleGenerateDescription}
-                  disabled={isGenerating}
-                >
-                  <Wand2 className={`h-4 w-4 ${isGenerating ? 'animate-pulse' : ''}`} />
-                </Button>
               </div>
               <FormMessage />
             </FormItem>
