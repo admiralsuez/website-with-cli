@@ -8,7 +8,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import BlinkingCursor from './blinking-cursor';
 import { ScrollArea } from './ui/scroll-area';
 import { Button } from './ui/button';
 import { X } from 'lucide-react';
@@ -22,6 +21,7 @@ interface InteractiveTerminalProps {
 type CommandRecord = {
   command: string;
   output: React.ReactNode;
+  isPasswordPrompt?: boolean;
 };
 
 export default function InteractiveTerminal({
@@ -31,7 +31,6 @@ export default function InteractiveTerminal({
 }: InteractiveTerminalProps) {
   const [history, setHistory] = useState<CommandRecord[]>([]);
   const [input, setInput] = useState('');
-  const [isAwaitingPassword, setAwaitingPassword] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -50,7 +49,6 @@ export default function InteractiveTerminal({
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
       setHistory([]);
-      setAwaitingPassword(false);
       setInput('');
     }
   }, [isOpen]);
@@ -59,14 +57,17 @@ export default function InteractiveTerminal({
     scrollToBottom();
   }, [history, scrollToBottom]);
 
+  const lastCommand = history[history.length - 1];
+  const isAwaitingPassword = lastCommand?.isPasswordPrompt && !lastCommand.command.includes('\n');
+
   const handleCommand = (command: string) => {
     let output: React.ReactNode;
-    let newHistoryRecord: CommandRecord = { command, output: '' };
+    let isPasswordPrompt = false;
 
     switch (command.toLowerCase().trim()) {
       case 'help':
         output = (
-          <div className='text-xs'>
+          <div className="text-xs">
             <p>Available commands:</p>
             <ul className="list-disc pl-5">
               <li>help - Show this help message</li>
@@ -77,21 +78,16 @@ export default function InteractiveTerminal({
             </ul>
           </div>
         );
-        newHistoryRecord.output = output;
-        setHistory((prev) => [...prev, newHistoryRecord]);
         break;
       case 'admin':
-        setAwaitingPassword(true);
-        newHistoryRecord.output = 'Enter password: ';
-        setHistory((prev) => [...prev, newHistoryRecord]);
-        return;
+        isPasswordPrompt = true;
+        output = 'Enter password: ';
+        break;
       case 'clear':
         setHistory([]);
         return;
       case 'date':
         output = new Date().toString();
-        newHistoryRecord.output = output;
-        setHistory((prev) => [...prev, newHistoryRecord]);
         break;
       default:
         if (command.toLowerCase().startsWith('echo ')) {
@@ -99,9 +95,8 @@ export default function InteractiveTerminal({
         } else {
           output = `command not found: ${command}`;
         }
-        newHistoryRecord.output = output;
-        setHistory((prev) => [...prev, newHistoryRecord]);
     }
+    setHistory((prev) => [...prev, { command, output, isPasswordPrompt }]);
   };
 
   const handlePassword = (password: string) => {
@@ -115,29 +110,43 @@ export default function InteractiveTerminal({
     }
 
     setHistory((prev) => {
-      const lastEntry = prev[prev.length - 1];
-      if (lastEntry) {
-        lastEntry.command = `${lastEntry.command}\n${output}`;
-      }
-      return [...prev];
+        const newHistory = [...prev];
+        const lastEntry = newHistory[newHistory.length - 1];
+        if (lastEntry) {
+            // Append password and result to the last command output
+            lastEntry.output = (
+                <>
+                    {lastEntry.output}
+                    {'*'.repeat(password.length)}
+                    <br />
+                    {output}
+                </>
+            );
+            // Mark as not a password prompt anymore
+            lastEntry.isPasswordPrompt = false; 
+        }
+        return newHistory;
     });
-
-    setAwaitingPassword(false);
   };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const commandToProcess = input.trim();
+    
     if (isAwaitingPassword) {
-      handlePassword(input);
+      handlePassword(commandToProcess);
     } else {
-      if (input.trim()) {
-        handleCommand(input);
+      if (commandToProcess) {
+        handleCommand(commandToProcess);
       } else {
         setHistory((prev) => [...prev, { command: '', output: '' }]);
       }
     }
     setInput('');
-    setTimeout(scrollToBottom, 0);
+    setTimeout(() => {
+        inputRef.current?.focus();
+        scrollToBottom();
+    }, 0);
   };
 
   return (
@@ -170,25 +179,38 @@ export default function InteractiveTerminal({
                   {item.output && (
                     <div className="text-foreground whitespace-pre-wrap">
                       {item.output}
+                      {item.isPasswordPrompt && (
+                        <form onSubmit={handleSubmit} className="inline-flex items-center gap-2">
+                            <Input
+                                ref={inputRef}
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                type="password"
+                                className="inline-block w-32 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                                autoComplete="off"
+                                autoFocus
+                            />
+                        </form>
+                      )}
                     </div>
                   )}
                 </div>
               ))}
-              <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                {!isAwaitingPassword && (
+              {!isAwaitingPassword && (
+                <form onSubmit={handleSubmit} className="flex items-center gap-2">
                     <span className="text-primary font-bold">
                     [user@cli-portfolio ~]$
                     </span>
-                )}
-                <Input
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  type={isAwaitingPassword ? 'password' : 'text'}
-                  className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
-                  autoComplete="off"
-                />
-              </form>
+                  <Input
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    type='text'
+                    className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                    autoComplete="off"
+                  />
+                </form>
+              )}
             </div>
           </ScrollArea>
         </div>
