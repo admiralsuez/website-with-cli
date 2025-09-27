@@ -131,10 +131,8 @@ export default function Home() {
             variant="ghost" 
             size="sm" 
             onClick={() => setPanelOpen(true)}
-            className="flex items-center gap-2"
           >
-            <Cog className="h-4 w-4" />
-            <span className="hidden sm:inline">Admin Panel</span>
+            Admin
           </Button>
         </footer>
       </CliContainer>
