@@ -84,7 +84,7 @@ export default function InteractiveTerminal({
         setAwaitingPassword(true);
         newHistory[newHistory.length - 1].output = 'Enter password: ';
         setHistory(newHistory);
-        return; 
+        return;
       case 'clear':
         setHistory([]);
         return;
@@ -103,42 +103,44 @@ export default function InteractiveTerminal({
         setHistory(newHistory);
     }
   };
-  
+
   const handlePassword = (password: string) => {
     let output: React.ReactNode;
     if (password === 'rooted@89') {
-        output = 'Authentication successful. Opening admin panel...';
-        openAdminPanel();
-        setTimeout(() => onOpenChange(false), 1000);
+      output = 'Authentication successful. Opening admin panel...';
+      openAdminPanel();
+      setTimeout(() => onOpenChange(false), 1000);
     } else {
-        output = 'root auth failure (this incident will be reported)';
+      output = 'root auth failure (this incident will be reported)';
     }
 
-    setHistory(prev => {
-        const lastEntry = prev[prev.length-1];
+    setHistory((prev) => {
+      const lastEntry = prev[prev.length - 1];
+      if (lastEntry) {
         lastEntry.output = (
-            <>
-                {lastEntry.output}
-                {'*'.repeat(password.length)}
-                <div>{output}</div>
-            </>
+          <>
+            {lastEntry.output}
+            {'*'.repeat(password.length)}
+            <div>{output}</div>
+          </>
         );
-        return [...prev];
+      }
+      return [...prev];
     });
 
     setAwaitingPassword(false);
-  }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isAwaitingPassword) {
-        handlePassword(input);
+      handlePassword(input);
     } else {
-        if (input.trim()) {
-            handleCommand(input);
-        } else {
-            setHistory(prev => [...prev, { command: '', output: '' }]);
-        }
+      if (input.trim()) {
+        handleCommand(input);
+      } else {
+        setHistory((prev) => [...prev, { command: '', output: '' }]);
+      }
     }
     setInput('');
   };
@@ -160,12 +162,12 @@ export default function InteractiveTerminal({
             <div className="font-code text-sm">
               {history.map((item, index) => (
                 <div key={index}>
-                    <div className="flex items-center gap-2">
-                        <span className="text-primary font-bold">
-                        [user@cli-portfolio ~]$
-                        </span>
-                        <span>{item.command}</span>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-primary font-bold">
+                      [user@cli-portfolio ~]$
+                    </span>
+                    <span>{item.command}</span>
+                  </div>
                   {item.output && (
                     <div className="text-foreground whitespace-pre-wrap">
                       {item.output}
@@ -177,7 +179,9 @@ export default function InteractiveTerminal({
                 <span className="text-primary font-bold">
                   [user@cli-portfolio ~]$
                 </span>
-                {isAwaitingPassword && <span className="mr-2">Enter password:</span>}
+                {isAwaitingPassword ? (
+                  <span className="mr-2">Enter password:</span>
+                ) : null}
                 <Input
                   ref={inputRef}
                   value={input}
