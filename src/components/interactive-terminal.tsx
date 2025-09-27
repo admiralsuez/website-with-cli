@@ -82,7 +82,7 @@ export default function InteractiveTerminal({
         setAwaitingPassword(true);
         output = 'Enter password:';
         setHistory((prev) => [...prev, { command, output }]);
-        break;
+        return; 
       case 'clear':
         setHistory([]);
         return;
@@ -109,7 +109,23 @@ export default function InteractiveTerminal({
     } else {
         output = 'root auth failure (this incident will be reported)';
     }
-    setHistory(prev => [...prev, { command: '', output, isPassword: true }]);
+
+    setHistory(prev => {
+        const lastEntry = prev[prev.length-1];
+        const newHistory = [...prev.slice(0, -1)];
+        newHistory.push({
+            ...lastEntry,
+            output: (
+                <>
+                    {lastEntry.output}
+                    <div>{output}</div>
+                </>
+            ),
+            isPassword: true,
+        })
+        return newHistory;
+    });
+
     setAwaitingPassword(false);
   }
 
@@ -144,12 +160,12 @@ export default function InteractiveTerminal({
             <div className="font-code text-sm">
               {history.map((item, index) => (
                 <div key={index}>
-                  <div className="flex items-center gap-2">
-                    <span className="text-primary font-bold">
-                      [user@cli-portfolio ~]$
-                    </span>
-                    {!item.isPassword && <span>{item.command}</span>}
-                  </div>
+                    <div className="flex items-center gap-2">
+                        {!item.isPassword && <span className="text-primary font-bold">
+                        [user@cli-portfolio ~]$
+                        </span>}
+                        {!item.isPassword && <span>{item.command}</span>}
+                    </div>
                   {item.output && (
                     <div className="text-foreground whitespace-pre-wrap">
                       {item.output}
@@ -158,9 +174,9 @@ export default function InteractiveTerminal({
                 </div>
               ))}
               <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                <span className="text-primary font-bold">
+                {!isAwaitingPassword && <span className="text-primary font-bold">
                   [user@cli-portfolio ~]$
-                </span>
+                </span>}
                 <Input
                   ref={inputRef}
                   value={input}
