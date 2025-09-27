@@ -13,6 +13,7 @@ import type { Project, Theme } from '@/lib/types';
 import { hexToHslString } from '@/lib/colors';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import InteractiveTerminal from '@/components/interactive-terminal';
+import { Cog } from 'lucide-react';
 
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
@@ -115,15 +116,26 @@ export default function Home() {
         </main>
 
         <footer 
-          className="p-4 border-t cursor-pointer"
-          onClick={() => setTerminalOpen(true)}
+          className="p-4 border-t flex items-center justify-between"
         >
-          <div className="flex items-center gap-2 text-xs sm:text-sm">
+          <div 
+            className="flex items-center gap-2 text-xs sm:text-sm cursor-pointer"
+            onClick={() => setTerminalOpen(true)}
+          >
             <span className="text-primary font-bold">
               [user@cli-portfolio ~]$
             </span>
             <BlinkingCursor />
           </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setPanelOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Cog className="h-4 w-4" />
+            <span className="hidden sm:inline">Admin Panel</span>
+          </Button>
         </footer>
       </CliContainer>
 
