@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -15,6 +16,11 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from './ui/scroll-area';
+import { Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import { generateProjectDescription } from '@/ai/flows/generate-project-description';
+import { useToast } from '@/hooks/use-toast';
 
 const projectSchema = z.object({
   name: z.string().min(1, 'Project name is required.'),
@@ -33,6 +39,9 @@ interface ProjectFormProps {
 }
 
 export default function ProjectForm({ project, onSave }: ProjectFormProps) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
+
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
@@ -44,6 +53,37 @@ export default function ProjectForm({ project, onSave }: ProjectFormProps) {
       imageUrl: project?.imageUrl ?? '',
     },
   });
+
+  const handleGenerateDescription = async () => {
+    const { name, techStack } = form.getValues();
+    if (!name || !techStack) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing Information',
+        description: 'Please provide a project name and tech stack to generate a description.',
+      });
+      return;
+    }
+    setIsGenerating(true);
+    try {
+      const result = await generateProjectDescription({ projectName: name, techStack });
+      if (result.description) {
+        form.setValue('description', result.description);
+        toast({
+          title: 'Description Generated',
+          description: 'The AI-powered description has been added.',
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Generation Failed',
+        description: 'Could not generate a description at this time.',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const onSubmit = (data: ProjectFormValues) => {
     onSave({
@@ -95,6 +135,17 @@ export default function ProjectForm({ project, onSave }: ProjectFormProps) {
                     {...field}
                   />
                 </FormControl>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute bottom-2 right-2 h-7 w-7"
+                  onClick={handleGenerateDescription}
+                  disabled={isGenerating}
+                >
+                  <Sparkles className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
+                  <span className="sr-only">Generate with AI</span>
+                </Button>
               </div>
               <FormMessage />
             </FormItem>

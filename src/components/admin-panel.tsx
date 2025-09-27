@@ -13,6 +13,7 @@ import { Button } from './ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from './ui/dialog';
@@ -80,7 +81,7 @@ export default function AdminPanel({
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full max-w-none sm:max-w-2xl md:max-w-3xl lg:max-w-4xl flex flex-col">
+      <SheetContent className="w-[90vw] max-w-[90vw] md:w-full md:max-w-2xl lg:max-w-4xl flex flex-col">
         <SheetHeader>
           <SheetTitle>Admin Panel</SheetTitle>
           <SheetDescription>
@@ -100,6 +101,9 @@ export default function AdminPanel({
                 Add Project
               </Button>
             </div>
+            <p className="text-sm text-muted-foreground px-1">
+              Changes made here will be reflected on the project's individual page.
+            </p>
             <ScrollArea className="flex-1 -mx-6">
                 <div className="px-6 space-y-4">
               {projects.map((project) => (
@@ -163,16 +167,23 @@ export default function AdminPanel({
         open={isProjectDialogOpen}
         onOpenChange={setProjectDialogOpen}
       >
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>
               {editingProject ? 'Edit Project' : 'Add New Project'}
             </DialogTitle>
+             <DialogDescription>
+              Provide the details for your project. The image URL can be a link to a GIF or a static image.
+            </DialogDescription>
           </DialogHeader>
-          <ProjectForm
-            project={editingProject}
-            onSave={handleProjectFormSubmit}
-          />
+          <ScrollArea className="-mx-6 flex-1">
+            <div className="px-6">
+              <ProjectForm
+                project={editingProject}
+                onSave={handleProjectFormSubmit}
+              />
+            </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </Sheet>

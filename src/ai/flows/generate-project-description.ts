@@ -9,7 +9,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
 
 const GenerateProjectDescriptionInputSchema = z.object({
   projectName: z.string().describe('The name of the project.'),
