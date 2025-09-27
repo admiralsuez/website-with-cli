@@ -74,7 +74,7 @@ export default function AdminPanel({
         projects.map((p) => (p.id === project.id ? project : p))
       );
     } else {
-      setProjects([...projects, project]);
+      setProjects([...projects, { ...project, id: new Date().getTime().toString() }]);
     }
     setProjectDialogOpen(false);
   };
@@ -176,14 +176,14 @@ export default function AdminPanel({
               Provide the details for your project. The image URL can be a link to a GIF or a static image.
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="-mx-6 flex-1">
+          <div className="flex-1 overflow-y-auto -mx-6">
             <div className="px-6">
               <ProjectForm
                 project={editingProject}
                 onSave={handleProjectFormSubmit}
               />
             </div>
-          </ScrollArea>
+          </div>
         </DialogContent>
       </Dialog>
     </Sheet>

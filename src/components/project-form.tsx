@@ -18,9 +18,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
 const projectSchema = z.object({
-  name: z.string().min(1, 'Project name is required.'),
-  techStack: z.string().min(1, 'Tech stack is required.'),
-  description: z.string().min(1, 'Description is required.'),
+  name: z.string().optional(),
+  techStack: z.string().optional(),
+  description: z.string().optional(),
   liveUrl: z.string().url().optional().or(z.literal('')),
   repoUrl: z.string().url().optional().or(z.literal('')),
   imageUrl: z.string().url().optional().or(z.literal('')),
