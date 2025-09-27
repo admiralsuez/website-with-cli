@@ -21,13 +21,25 @@ export default function Home() {
   const [isPanelOpen, setPanelOpen] = useState(false);
   const [isTerminalOpen, setTerminalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [showProjects, setShowProjects] = useState(false);
-  const [showProjectsCommand, setShowProjectsCommand] = useState(false);
+
+  // New state to control the animation sequence
+  const [welcomeVisible, setWelcomeVisible] = useState(false);
+  const [commandVisible, setCommandVisible] = useState(false);
+  const [projectsVisible, setProjectsVisible] = useState(false);
 
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+      const timer = setTimeout(() => {
+        setWelcomeVisible(true);
+      }, 500); // Small delay to ensure mount
+      return () => clearTimeout(timer);
+    }
+  }, [isMounted]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -58,10 +70,13 @@ export default function Home() {
   }, [theme]);
   
   const handleWelcomeComplete = () => {
-    setShowProjectsCommand(true);
-    setTimeout(() => setShowProjects(true), 500);
+    setTimeout(() => setCommandVisible(true), 100);
   };
   
+  const handleCommandComplete = () => {
+    setTimeout(() => setProjectsVisible(true), 500);
+  };
+
   if (!isMounted) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-background">
@@ -69,30 +84,39 @@ export default function Home() {
       </div>
     );
   }
+  
+  const cliPrompt = theme.prompt || 'user@cli-portfolio';
 
   return (
     <div className="p-4 md:p-8 flex items-center justify-center min-h-screen">
       <CliContainer>
         <main className="flex-1 p-4 md:p-6 space-y-8 overflow-y-auto">
-          <div className="flex items-center gap-2">
-            <span className="text-primary font-bold hidden sm:inline">
-              [user@cli-portfolio ~]$
-            </span>
-            <Typewriter
-              text={theme.welcomeMessage || ''}
-              className="font-headline text-lg sm:text-2xl"
-              onComplete={handleWelcomeComplete}
-            />
-          </div>
+          {welcomeVisible && (
+            <div className="flex items-center gap-2">
+              <span className="text-primary font-bold hidden sm:inline">
+                [{cliPrompt} ~]$
+              </span>
+              <Typewriter
+                text={theme.welcomeMessage || ''}
+                className="font-headline text-lg sm:text-2xl"
+                onComplete={handleWelcomeComplete}
+              />
+            </div>
+          )}
 
-          {showProjectsCommand && (
+          {commandVisible && (
             <div className="space-y-6 animate-in fade-in duration-500">
               <div className="flex items-center gap-2">
-                <span className="text-primary font-bold">[user@cli-portfolio ~]$</span>
-                <h2 className="text-lg sm:text-xl font-bold font-headline">ls projects</h2>
+                <span className="text-primary font-bold">[{cliPrompt} ~]$</span>
+                <Typewriter 
+                  text="ls projects" 
+                  className="text-lg sm:text-xl font-bold font-headline"
+                  onComplete={handleCommandComplete}
+                  speed={70}
+                />
               </div>
               
-              {showProjects && (
+              {projectsVisible && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 animate-in fade-in duration-500">
                   {projects.filter(p => !p.hidden).map((project) => (
                     <Link href={`/projects/${project.id}`} key={project.id} className="no-underline">
@@ -137,7 +161,7 @@ export default function Home() {
             onClick={() => setTerminalOpen(true)}
           >
             <span className="text-primary font-bold">
-              [user@cli-portfolio ~]$
+              [{cliPrompt} ~]$
             </span>
             <BlinkingCursor />
           </div>
@@ -161,6 +185,7 @@ export default function Home() {
         onOpenChange={setTerminalOpen}
         openAdminPanel={() => setPanelOpen(true)}
         projects={projects}
+        prompt={cliPrompt}
       />
     </div>
   );

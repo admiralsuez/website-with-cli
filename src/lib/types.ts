@@ -15,4 +15,5 @@ export type Theme = {
   accentColor: string;
   font: string;
   welcomeMessage?: string;
+  prompt?: string;
 };

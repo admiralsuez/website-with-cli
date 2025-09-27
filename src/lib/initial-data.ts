@@ -43,4 +43,5 @@ export const initialTheme: Theme = {
   accentColor: '#32CD32',
   font: 'Space Grotesk',
   welcomeMessage: ' welcome-to-my-portfolio',
+  prompt: 'user@cli-portfolio',
 };

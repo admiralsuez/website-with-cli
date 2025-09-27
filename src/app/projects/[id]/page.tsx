@@ -1,20 +1,26 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { initialProjects } from '@/lib/initial-data';
+import { initialProjects, initialTheme } from '@/lib/initial-data';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import CliContainer from '@/components/cli-container';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import BlinkingCursor from '@/components/blinking-cursor';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import type { Theme } from '@/lib/types';
 
 export default function ProjectPage() {
   const router = useRouter();
   const params = useParams();
   const projectId = params.id;
+  const [theme] = useState<Theme>(initialTheme);
 
+  // In a real app, you'd fetch this from a persistent store
   const project = initialProjects.find((p) => p.id === projectId);
+  
+  const cliPrompt = theme.prompt || 'user@cli-portfolio';
 
   if (!project) {
     return (
@@ -30,10 +36,10 @@ export default function ProjectPage() {
         <main className="flex-1 p-4 md:p-6 space-y-8 overflow-y-auto">
           <div className="flex items-center gap-2">
             <span className="text-primary font-bold hidden sm:inline">
-              [user@cli-portfolio ~]$
+              [{cliPrompt} ~]$
             </span>
             <span className="font-headline text-lg sm:text-2xl">
-              cat projects/{project.name.toLowerCase().replace(/ /g, '_')}.md
+              cat projects/{project.name ? project.name.toLowerCase().replace(/ /g, '_') : 'untitled'}.md
             </span>
           </div>
 
@@ -49,7 +55,7 @@ export default function ProjectPage() {
                 <div className="aspect-video relative overflow-hidden rounded-md border">
                   <Image
                     src={project.imageUrl}
-                    alt={project.name}
+                    alt={project.name || 'Project image'}
                     fill
                     className="object-cover"
                     data-ai-hint="screenshot app"
@@ -80,7 +86,7 @@ export default function ProjectPage() {
         <footer className="p-4 border-t">
           <div className="flex items-center gap-2 text-xs sm:text-sm">
             <Link href="/" className="text-primary font-bold hover:underline">
-              [user@cli-portfolio ~]$ cd ..
+              [{cliPrompt} ~]$ cd ..
             </Link>
             <BlinkingCursor />
           </div>

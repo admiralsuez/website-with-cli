@@ -24,6 +24,7 @@ const themeSchema = z.object({
   accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex code'),
   font: z.string().min(1, 'Font is required'),
   welcomeMessage: z.string().optional(),
+  prompt: z.string().optional(),
 });
 
 type ThemeFormValues = z.infer<typeof themeSchema>;
@@ -72,6 +73,22 @@ export default function ThemeForm({
                     </FormControl>
                     <FormDescription>
                       The text to display in the typewriter animation on the main page.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="prompt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CLI Prompt</FormLabel>
+                    <FormControl>
+                      <Input placeholder="user@cli-portfolio" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      The prompt text displayed in the terminal (e.g., user@hostname).
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

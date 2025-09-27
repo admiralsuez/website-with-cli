@@ -17,6 +17,7 @@ interface InteractiveTerminalProps {
   onOpenChange: (isOpen: boolean) => void;
   openAdminPanel: () => void;
   projects: Project[];
+  prompt: string;
 }
 
 type CommandRecord = {
@@ -30,6 +31,7 @@ export default function InteractiveTerminal({
   onOpenChange,
   openAdminPanel,
   projects,
+  prompt,
 }: InteractiveTerminalProps) {
   const [history, setHistory] = useState<CommandRecord[]>([]);
   const [input, setInput] = useState('');
@@ -55,10 +57,12 @@ export default function InteractiveTerminal({
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
-      setHistory([initialMessage]);
+      if (history.length === 0 || (history.length === 1 && history[0] === initialMessage)) {
+        setHistory([initialMessage]);
+      }
       setInput('');
     }
-  }, [isOpen]);
+  }, [isOpen, history]);
 
   useEffect(() => {
     scrollToBottom();
@@ -66,6 +70,7 @@ export default function InteractiveTerminal({
 
   const lastCommand = history[history.length - 1];
   const isAwaitingPassword = lastCommand?.isPasswordPrompt && !lastCommand.command.includes('\n');
+  const cliPrompt = prompt || 'user@cli-portfolio';
 
   const handleCommand = (command: string) => {
     let output: React.ReactNode;
@@ -95,7 +100,7 @@ export default function InteractiveTerminal({
         output = 'Enter password: ';
         break;
       case 'clear':
-        setHistory([initialMessage]);
+        setHistory([]);
         return;
       case 'date':
         output = new Date().toString();
@@ -199,7 +204,7 @@ export default function InteractiveTerminal({
                  {item.command && (
                     <div className="flex items-center gap-2">
                         <span className="text-primary font-bold">
-                        [user@cli-portfolio ~]$
+                        [{cliPrompt} ~]$
                         </span>
                         <span className='whitespace-pre-wrap'>{item.command}</span>
                     </div>
@@ -207,8 +212,15 @@ export default function InteractiveTerminal({
                   {item.output && (
                     <div className="text-foreground whitespace-pre-wrap">
                       {item.output}
-                      {item.isPasswordPrompt && (
-                        <form onSubmit={handleSubmit} className="inline-flex items-center gap-2">
+                    </div>
+                  )}
+                </div>
+              ))}
+                {isAwaitingPassword ? (
+                    <div className="flex items-center gap-2">
+                        <span className="text-primary font-bold">[{cliPrompt} ~]$</span>
+                        <span>{history[history.length -1]?.output}</span>
+                         <form onSubmit={handleSubmit} className="inline-flex items-center gap-2">
                             <Input
                                 ref={inputRef}
                                 value={input}
@@ -219,26 +231,22 @@ export default function InteractiveTerminal({
                                 autoFocus
                             />
                         </form>
-                      )}
                     </div>
-                  )}
-                </div>
-              ))}
-              {!isAwaitingPassword && (
-                <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                    <span className="text-primary font-bold">
-                    [user@cli-portfolio ~]$
-                    </span>
-                  <Input
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    type='text'
-                    className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
-                    autoComplete="off"
-                  />
-                </form>
-              )}
+                ) : (
+                    <form onSubmit={handleSubmit} className="flex items-center gap-2">
+                        <span className="text-primary font-bold">
+                        [{cliPrompt} ~]$
+                        </span>
+                    <Input
+                        ref={inputRef}
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        type='text'
+                        className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                        autoComplete="off"
+                    />
+                    </form>
+                )}
             </div>
           </ScrollArea>
         </div>
