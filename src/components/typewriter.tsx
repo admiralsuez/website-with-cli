@@ -16,7 +16,12 @@ const Typewriter = ({ text, speed = 50, className, onComplete }: TypewriterProps
 
   useEffect(() => {
     // Only run if text is provided
-    if (!text) return;
+    if (!text) {
+        if (onCompleteRef.current) {
+          onCompleteRef.current();
+        }
+        return;
+    };
     
     setDisplayedText('');
     let i = 0;
