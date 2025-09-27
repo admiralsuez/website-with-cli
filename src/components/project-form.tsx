@@ -22,6 +22,7 @@ const projectSchema = z.object({
   description: z.string().min(1, 'Description is required.'),
   liveUrl: z.string().url().optional().or(z.literal('')),
   repoUrl: z.string().url().optional().or(z.literal('')),
+  imageUrl: z.string().url().optional().or(z.literal('')),
 });
 
 type ProjectFormValues = z.infer<typeof projectSchema>;
@@ -40,6 +41,7 @@ export default function ProjectForm({ project, onSave }: ProjectFormProps) {
       description: project?.description ?? '',
       liveUrl: project?.liveUrl ?? '',
       repoUrl: project?.repoUrl ?? '',
+      imageUrl: project?.imageUrl ?? '',
     },
   });
 
@@ -94,6 +96,19 @@ export default function ProjectForm({ project, onSave }: ProjectFormProps) {
                   />
                 </FormControl>
               </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="imageUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Image URL</FormLabel>
+              <FormControl>
+                <Input placeholder="https://example.com/image.gif" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

@@ -5,6 +5,7 @@ export type Project = {
   techStack: string;
   liveUrl?: string;
   repoUrl?: string;
+  imageUrl?: string;
 };
 
 export type Theme = {
