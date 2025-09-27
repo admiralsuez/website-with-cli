@@ -21,6 +21,9 @@ export default function Home() {
   const [isPanelOpen, setPanelOpen] = useState(false);
   const [isTerminalOpen, setTerminalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [showProjects, setShowProjects] = useState(false);
+  const [showProjectsCommand, setShowProjectsCommand] = useState(false);
+
 
   useEffect(() => {
     setIsMounted(true);
@@ -54,6 +57,11 @@ export default function Home() {
     }
   }, [theme]);
   
+  const handleWelcomeComplete = () => {
+    setShowProjectsCommand(true);
+    setTimeout(() => setShowProjects(true), 500);
+  };
+  
   if (!isMounted) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-background">
@@ -73,46 +81,52 @@ export default function Home() {
             <Typewriter
               text={theme.welcomeMessage || ''}
               className="font-headline text-lg sm:text-2xl"
+              onComplete={handleWelcomeComplete}
             />
           </div>
 
-          <div className="space-y-6">
-            <div className="flex items-center gap-2">
-              <span className="text-primary font-bold">[user@cli-portfolio ~]$</span>
-              <h2 className="text-lg sm:text-xl font-bold font-headline">ls projects</h2>
+          {showProjectsCommand && (
+            <div className="space-y-6 animate-in fade-in duration-500">
+              <div className="flex items-center gap-2">
+                <span className="text-primary font-bold">[user@cli-portfolio ~]$</span>
+                <h2 className="text-lg sm:text-xl font-bold font-headline">ls projects</h2>
+              </div>
+              
+              {showProjects && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 animate-in fade-in duration-500">
+                  {projects.filter(p => !p.hidden).map((project) => (
+                    <Link href={`/projects/${project.id}`} key={project.id} className="no-underline">
+                      <Card className="bg-card/50 hover:bg-card/90 transition-colors flex flex-col h-full">
+                        <CardHeader className="p-4">
+                          <CardTitle className="text-primary text-base sm:text-lg">{project.name}</CardTitle>
+                          <CardDescription className="font-code text-xs pt-1">
+                            <span className="text-foreground">TECH:</span> {project.techStack}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-4 pt-0 flex-1 flex flex-col gap-4">
+                          {project.imageUrl && (
+                            <div className="aspect-video relative overflow-hidden rounded-md">
+                              <Image 
+                                src={project.imageUrl} 
+                                alt={project.name || 'Project image'} 
+                                fill
+                                className="object-cover"
+                                data-ai-hint="screenshot app"
+                              />
+                            </div>
+                          )}
+                          <p className="text-xs sm:text-sm line-clamp-3">{project.description}</p>
+                        </CardContent>
+                        <CardFooter className="p-4 pt-0 mt-auto flex gap-4">
+                          <span className="text-foreground text-xs sm:text-sm">[view_project]</span>
+                        </CardFooter>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              {projects.filter(p => !p.hidden).map((project) => (
-                <Link href={`/projects/${project.id}`} key={project.id} className="no-underline">
-                  <Card className="bg-card/50 hover:bg-card/90 transition-colors flex flex-col h-full">
-                    <CardHeader className="p-4">
-                      <CardTitle className="text-primary text-base sm:text-lg">{project.name}</CardTitle>
-                      <CardDescription className="font-code text-xs pt-1">
-                        <span className="text-foreground">TECH:</span> {project.techStack}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-0 flex-1 flex flex-col gap-4">
-                      {project.imageUrl && (
-                         <div className="aspect-video relative overflow-hidden rounded-md">
-                           <Image 
-                             src={project.imageUrl} 
-                             alt={project.name || 'Project image'} 
-                             fill
-                             className="object-cover"
-                             data-ai-hint="screenshot app"
-                           />
-                         </div>
-                      )}
-                      <p className="text-xs sm:text-sm line-clamp-3">{project.description}</p>
-                    </CardContent>
-                    <CardFooter className="p-4 pt-0 mt-auto flex gap-4">
-                      <span className="text-foreground text-xs sm:text-sm">[view_project]</span>
-                    </CardFooter>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </div>
+          )}
         </main>
 
         <footer 

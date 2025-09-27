@@ -5,9 +5,10 @@ type TypewriterProps = {
   text: string;
   speed?: number;
   className?: string;
+  onComplete?: () => void;
 };
 
-const Typewriter = ({ text, speed = 50, className }: TypewriterProps) => {
+const Typewriter = ({ text, speed = 50, className, onComplete }: TypewriterProps) => {
   const [displayedText, setDisplayedText] = useState('');
 
   useEffect(() => {
@@ -18,11 +19,14 @@ const Typewriter = ({ text, speed = 50, className }: TypewriterProps) => {
       i++;
       if (i >= text.length) {
         clearInterval(intervalId);
+        if (onComplete) {
+          onComplete();
+        }
       }
     }, speed);
 
     return () => clearInterval(intervalId);
-  }, [text, speed]);
+  }, [text, speed, onComplete]);
 
   return <span className={className}>{displayedText}</span>;
 };
