@@ -71,7 +71,7 @@ export default function Home() {
               [user@cli-portfolio ~]$
             </span>
             <Typewriter
-              text=" welcome-to-my-portfolio"
+              text={theme.welcomeMessage || ''}
               className="font-headline text-lg sm:text-2xl"
             />
           </div>
@@ -96,7 +96,7 @@ export default function Home() {
                          <div className="aspect-video relative overflow-hidden rounded-md">
                            <Image 
                              src={project.imageUrl} 
-                             alt={project.name} 
+                             alt={project.name || 'Project image'} 
                              fill
                              className="object-cover"
                              data-ai-hint="screenshot app"

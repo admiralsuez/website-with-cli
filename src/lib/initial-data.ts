@@ -42,4 +42,5 @@ export const initialTheme: Theme = {
   backgroundColor: '#1A1A1A',
   accentColor: '#32CD32',
   font: 'Space Grotesk',
+  welcomeMessage: ' welcome-to-my-portfolio',
 };

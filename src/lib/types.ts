@@ -1,8 +1,8 @@
 export type Project = {
   id: string;
-  name: string;
-  description: string;
-  techStack: string;
+  name?: string;
+  description?: string;
+  techStack?: string;
   liveUrl?: string;
   repoUrl?: string;
   imageUrl?: string;
@@ -13,4 +13,5 @@ export type Theme = {
   backgroundColor: string;
   accentColor: string;
   font: string;
+  welcomeMessage?: string;
 };

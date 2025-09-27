@@ -23,6 +23,7 @@ const themeSchema = z.object({
   primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex code'),
   accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a valid hex code'),
   font: z.string().min(1, 'Font is required'),
+  welcomeMessage: z.string().optional(),
 });
 
 type ThemeFormValues = z.infer<typeof themeSchema>;
@@ -60,6 +61,22 @@ export default function ThemeForm({
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+               <FormField
+                control={form.control}
+                name="welcomeMessage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Welcome Message</FormLabel>
+                    <FormControl>
+                      <Input placeholder=" welcome-to-my-portfolio" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      The text to display in the typewriter animation on the main page.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
