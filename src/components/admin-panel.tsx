@@ -1,0 +1,178 @@
+'use client';
+
+import type { Project, Theme } from '@/lib/types';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from './ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/dialog';
+import ProjectForm from './project-form';
+import ThemeForm from './theme-form';
+import { useState } from 'react';
+import { PlusCircle, Trash2, Edit } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from './ui/alert-dialog';
+import { ScrollArea } from './ui/scroll-area';
+
+interface AdminPanelProps {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  projects: Project[];
+  setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
+  currentTheme: Theme;
+  onThemeChange: (theme: Theme) => void;
+}
+
+export default function AdminPanel({
+  isOpen,
+  onOpenChange,
+  projects,
+  setProjects,
+  currentTheme,
+  onThemeChange,
+}: AdminPanelProps) {
+  const [isProjectDialogOpen, setProjectDialogOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+
+  const handleAddProject = () => {
+    setEditingProject(null);
+    setProjectDialogOpen(true);
+  };
+
+  const handleEditProject = (project: Project) => {
+    setEditingProject(project);
+    setProjectDialogOpen(true);
+  };
+
+  const handleDeleteProject = (projectId: string) => {
+    setProjects(projects.filter((p) => p.id !== projectId));
+  };
+
+  const handleProjectFormSubmit = (project: Project) => {
+    if (editingProject) {
+      setProjects(
+        projects.map((p) => (p.id === project.id ? project : p))
+      );
+    } else {
+      setProjects([...projects, project]);
+    }
+    setProjectDialogOpen(false);
+  };
+
+  return (
+    <Sheet open={isOpen} onOpenChange={onOpenChange}>
+      <SheetContent className="w-full sm:max-w-xl md:max-w-2xl lg:max-w-3xl flex flex-col">
+        <SheetHeader>
+          <SheetTitle>Admin Panel</SheetTitle>
+          <SheetDescription>
+            Customize your portfolio content and appearance.
+          </SheetDescription>
+        </SheetHeader>
+        <Tabs defaultValue="projects" className="flex-1 flex flex-col min-h-0">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="projects">Projects</TabsTrigger>
+            <TabsTrigger value="appearance">Appearance</TabsTrigger>
+          </TabsList>
+          <TabsContent value="projects" className="flex-1 flex flex-col gap-4 min-h-0">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium">Manage Projects</h3>
+              <Button onClick={handleAddProject} size="sm">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Project
+              </Button>
+            </div>
+            <ScrollArea className="flex-1 border rounded-md">
+                <div className="p-4 space-y-4">
+              {projects.map((project) => (
+                <div
+                  key={project.id}
+                  className="flex items-center justify-between p-3 rounded-md bg-secondary"
+                >
+                  <span className="font-semibold">{project.name}</span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEditProject(project)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete the project "{project.name}".
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteProject(project.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              ))}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+          <TabsContent value="appearance">
+            <ThemeForm
+              currentTheme={currentTheme}
+              onThemeChange={onThemeChange}
+            />
+          </TabsContent>
+        </Tabs>
+      </SheetContent>
+
+      <Dialog
+        open={isProjectDialogOpen}
+        onOpenChange={setProjectDialogOpen}
+      >
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {editingProject ? 'Edit Project' : 'Add New Project'}
+            </DialogTitle>
+          </DialogHeader>
+          <ProjectForm
+            project={editingProject}
+            onSave={handleProjectFormSubmit}
+          />
+        </DialogContent>
+      </Dialog>
+    </Sheet>
+  );
+}
