@@ -117,22 +117,14 @@ export default function InteractiveTerminal({
     setHistory((prev) => {
       const lastEntry = prev[prev.length - 1];
       if (lastEntry) {
-        // This is a bit of a hack to make it look like one line
-        lastEntry.output = (
-          <>
-            {lastEntry.output}
-            {'*'.repeat(password.length)}
-            <br />
-            {output}
-          </>
-        );
+        lastEntry.command = `${lastEntry.command}\n${output}`;
       }
       return [...prev];
     });
 
     setAwaitingPassword(false);
   };
-
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isAwaitingPassword) {
@@ -183,9 +175,11 @@ export default function InteractiveTerminal({
                 </div>
               ))}
               <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                <span className="text-primary font-bold">
-                  [user@cli-portfolio ~]$
-                </span>
+                {!isAwaitingPassword && (
+                    <span className="text-primary font-bold">
+                    [user@cli-portfolio ~]$
+                    </span>
+                )}
                 <Input
                   ref={inputRef}
                   value={input}
