@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { Settings } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import AdminPanel from '@/components/admin-panel';
 import BlinkingCursor from '@/components/blinking-cursor';
@@ -11,11 +10,13 @@ import { initialProjects, initialTheme } from '@/lib/initial-data';
 import type { Project, Theme } from '@/lib/types';
 import { hexToHslString } from '@/lib/colors';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import InteractiveTerminal from '@/components/interactive-terminal';
 
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [theme, setTheme] = useState<Theme>(initialTheme);
   const [isPanelOpen, setPanelOpen] = useState(false);
+  const [isTerminalOpen, setTerminalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export default function Home() {
   
   if (!isMounted) {
     return (
-      <div className="w-full h-screen flex items-center justify-center">
+      <div className="w-full h-screen flex items-center justify-center bg-background">
         <BlinkingCursor />
       </div>
     );
@@ -61,21 +62,6 @@ export default function Home() {
   return (
     <div className="p-4 md:p-8">
       <CliContainer>
-        <header className="flex items-center justify-between p-4 border-b">
-          <h1 className="font-headline text-lg text-primary-foreground font-bold">
-            user@cli-portfolio: ~
-          </h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setPanelOpen(true)}
-            className="text-primary-foreground hover:bg-accent/20 hover:text-accent-foreground"
-          >
-            <Settings className="h-5 w-5" />
-            <span className="sr-only">Open Settings</span>
-          </Button>
-        </header>
-
         <main className="flex-1 p-6 space-y-8 overflow-y-auto">
           <div className="flex items-center gap-2">
             <span className="text-primary font-bold hidden sm:inline">
@@ -126,7 +112,10 @@ export default function Home() {
           </div>
         </main>
 
-        <footer className="p-4 border-t">
+        <footer 
+          className="p-4 border-t cursor-pointer"
+          onClick={() => setTerminalOpen(true)}
+        >
           <div className="flex items-center gap-2 text-sm">
             <span className="text-primary font-bold">
               [user@cli-portfolio ~]$
@@ -143,6 +132,11 @@ export default function Home() {
         setProjects={setProjects}
         currentTheme={theme}
         onThemeChange={setTheme}
+      />
+      <InteractiveTerminal 
+        isOpen={isTerminalOpen}
+        onOpenChange={setTerminalOpen}
+        openAdminPanel={() => setPanelOpen(true)}
       />
     </div>
   );
