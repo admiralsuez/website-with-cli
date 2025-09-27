@@ -127,13 +127,6 @@ export default function Home() {
             </span>
             <BlinkingCursor />
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setPanelOpen(true)}
-          >
-            Admin
-          </Button>
         </footer>
       </CliContainer>
 
