@@ -95,6 +95,7 @@ export default function InteractiveTerminal({
             </ul>
           </div>
         );
+        setHistory((prev) => [...prev, { command, output }]);
         break;
       case 'admin':
         setIsAwaitingPassword(true);
@@ -105,6 +106,7 @@ export default function InteractiveTerminal({
         return;
       case 'date':
         output = new Date().toString();
+        setHistory((prev) => [...prev, { command, output }]);
         break;
       case 'ls':
         const showHidden = commandParts.includes('-a');
@@ -124,6 +126,7 @@ export default function InteractiveTerminal({
             ))}
           </ul>
         );
+        setHistory((prev) => [...prev, { command, output }]);
         break;
       default:
         if (mainCommand === 'echo') {
@@ -131,8 +134,8 @@ export default function InteractiveTerminal({
         } else if (command) {
           output = `command not found: ${command}`;
         }
+         setHistory((prev) => [...prev, { command, output }]);
     }
-    setHistory((prev) => [...prev, { command, output }]);
   };
   
   const handlePassword = (password: string) => {
@@ -152,7 +155,10 @@ export default function InteractiveTerminal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const commandToProcess = input.trim();
-    if (commandToProcess === '') return;
+    if (commandToProcess === '') {
+        setHistory(prev => [...prev, { command: '', output: '' }]);
+        return;
+    }
 
     if (isAwaitingPassword) {
       handlePassword(commandToProcess);
