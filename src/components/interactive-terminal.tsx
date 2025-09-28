@@ -75,7 +75,7 @@ export default function InteractiveTerminal({
 
   
   const cliPrompt = prompt || 'user@cli-portfolio';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'password';
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
   const handlePassword = (password: string) => {
     let output: React.ReactNode;

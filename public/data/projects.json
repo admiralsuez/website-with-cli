@@ -1,13 +1,14 @@
 [
   {
     "id": "1",
-    "name": "Project Alpha",
-    "description": "A revolutionary app that changes the way we see the world, built with cutting-edge technology for maximum performance.",
+    "name": "strawn",
     "techStack": "Next.js, Tailwind CSS, TypeScript, Firebase",
-    "liveUrl": "#",
-    "repoUrl": "#",
+    "description": "A revolutionary app that changes the way we see the world, built with cutting-edge technology for maximum performance.",
+    "liveUrl": "",
+    "repoUrl": "",
     "mediaPath": "/projects/alpha.png",
-    "mediaType": "image"
+    "mediaType": "image",
+    "hidden": true
   },
   {
     "id": "2",

@@ -122,7 +122,7 @@ export default function Home() {
       <Button
         variant="ghost"
         size="icon"
-        className="fixed top-4 right-4 z-10 h-8 w-8"
+        className="fixed top-4 right-4 z-10 h-8 w-8 hidden"
         onClick={() => setPanelOpen(true)}
       >
         <Cog />
