@@ -30,6 +30,11 @@ To change the site's colors, fonts, or welcome messages, edit the file at `src/l
 
 To change the content of an existing project, navigate to `src/lib/projects/` and open the file corresponding to the project you want to edit (e.g., `project-1.ts`). You can modify the `name`, `description`, `techStack`, and other properties directly in this file.
 
+### Adding a Project Image/Video
+
+1.  **Place your media file** (image or video) into the `public/projects/` directory.
+2.  **Update the `mediaPath`** in the corresponding project file (e.g., `project-1.ts`) to point to your new file. The path must start with `/projects/`. For example: `mediaPath: '/projects/my-cool-project.jpg'`.
+
 ### Adding a New Project
 
 1.  **Create a New Project File:** In the `src/lib/projects/` directory, create a new file for your project (e.g., `project-4.ts`). It's best to follow the existing naming convention.

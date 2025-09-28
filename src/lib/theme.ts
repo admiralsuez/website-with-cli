@@ -14,7 +14,7 @@ export const theme: Theme = {
   font: 'Space Grotesk', // The font for the entire site
 
   // --- Terminal Text ---
-  welcomeMessage: 'welcome-to-my-portfolio', // The message that appears on page load
-  prompt: 'user@cli-portfolio', // The command line prompt (e.g., user@host)
+  welcomeMessage: 'Making free software', // The message that appears on page load
+  prompt: 'vibin@cportfolio', // The command line prompt (e.g., user@host)
   loadingCommand: 'ls projects', // The command that appears to "run" to show projects
 };
