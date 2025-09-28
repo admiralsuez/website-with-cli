@@ -1,7 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
-import { initialProjects, initialTheme } from '@/lib/initial-data';
+import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import CliContainer from '@/components/cli-container';
@@ -10,16 +9,57 @@ import BlinkingCursor from '@/components/blinking-cursor';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { Project, Theme } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
+
 
 export default function ProjectPage() {
   const params = useParams();
   const projectId = params.id;
-  
-  // In a real app, you'd fetch this from a persistent store
-  const project = initialProjects.find((p) => p.id === projectId);
-  const theme = initialTheme;
-  
-  const cliPrompt = theme.prompt || 'user@cli-portfolio';
+  const { toast } = useToast();
+  const [project, setProject] = useState<Project | null>(null);
+  const [theme, setTheme] = useState<Theme | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!projectId) return;
+      try {
+        const [projectRes, themeRes] = await Promise.all([
+          fetch(`/api/projects?id=${projectId}`),
+          fetch('/api/theme'),
+        ]);
+
+        if (!projectRes.ok || !themeRes.ok) {
+          throw new Error('Failed to fetch data');
+        }
+
+        const projectData = await projectRes.json();
+        const themeData = await themeRes.json();
+
+        setProject(projectData);
+        setTheme(themeData);
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: 'Error',
+          description: 'Could not load project data.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [projectId, toast]);
+
+  if (isLoading || !theme) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-background">
+        <BlinkingCursor />
+      </div>
+    );
+  }
 
   if (!project) {
     return (
@@ -28,6 +68,8 @@ export default function ProjectPage() {
       </div>
     );
   }
+  
+  const cliPrompt = theme.prompt || 'user@cli-portfolio';
 
   return (
     <div className="p-4 md:p-8 flex items-center justify-center min-h-screen">

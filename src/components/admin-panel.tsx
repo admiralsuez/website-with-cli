@@ -33,6 +33,8 @@ import {
   AlertDialogTrigger,
 } from './ui/alert-dialog';
 import { ScrollArea } from './ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
+
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -53,6 +55,7 @@ export default function AdminPanel({
 }: AdminPanelProps) {
   const [isProjectDialogOpen, setProjectDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const { toast } = useToast();
 
   const handleAddProject = () => {
     setEditingProject(null);
@@ -64,18 +67,38 @@ export default function AdminPanel({
     setProjectDialogOpen(true);
   };
 
+  const saveProjects = async (updatedProjects: Project[]) => {
+    try {
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedProjects),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save projects');
+      }
+      setProjects(updatedProjects);
+      toast({ title: 'Success', description: 'Projects saved successfully.' });
+    } catch (error) {
+      console.error(error);
+      toast({ title: 'Error', description: 'Failed to save projects.', variant: 'destructive' });
+    }
+  };
+
   const handleDeleteProject = (projectId: string) => {
-    setProjects(projects.filter((p) => p.id !== projectId));
+    const updatedProjects = projects.filter((p) => p.id !== projectId);
+    saveProjects(updatedProjects);
   };
 
   const handleProjectFormSubmit = (project: Project) => {
+    let updatedProjects;
     if (editingProject) {
-      setProjects(
-        projects.map((p) => (p.id === project.id ? project : p))
-      );
+      updatedProjects = projects.map((p) => (p.id === project.id ? project : p));
     } else {
-      setProjects([...projects, { ...project, id: new Date().getTime().toString() }]);
+      updatedProjects = [...projects, { ...project, id: new Date().getTime().toString() }];
     }
+    saveProjects(updatedProjects);
     setProjectDialogOpen(false);
   };
 

@@ -8,16 +8,16 @@ import AdminPanel from '@/components/admin-panel';
 import BlinkingCursor from '@/components/blinking-cursor';
 import CliContainer from '@/components/cli-container';
 import Typewriter from '@/components/typewriter';
-import { initialProjects, initialTheme } from '@/lib/initial-data';
 import type { Project, Theme } from '@/lib/types';
 import { hexToHslString } from '@/lib/colors';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import InteractiveTerminal from '@/components/interactive-terminal';
 import { Cog } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Home() {
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
-  const [theme, setTheme] = useState<Theme>(initialTheme);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [theme, setTheme] = useState<Theme | null>(null);
   const [isPanelOpen, setPanelOpen] = useState(false);
   const [isTerminalOpen, setTerminalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -26,11 +26,40 @@ export default function Home() {
   const [welcomeVisible, setWelcomeVisible] = useState(false);
   const [commandVisible, setCommandVisible] = useState(false);
   const [projectsVisible, setProjectsVisible] = useState(false);
+  
+  const { toast } = useToast();
 
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    const fetchData = async () => {
+      try {
+        const [projectsRes, themeRes] = await Promise.all([
+          fetch('/api/projects'),
+          fetch('/api/theme'),
+        ]);
+
+        if (!projectsRes.ok || !themeRes.ok) {
+          throw new Error('Failed to fetch initial data');
+        }
+
+        const projectsData = await projectsRes.json();
+        const themeData = await themeRes.json();
+
+        setProjects(projectsData);
+        setTheme(themeData);
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: 'Error',
+          description: 'Could not load portfolio data. Please try refreshing.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsMounted(true);
+      }
+    };
+    fetchData();
+  }, [toast]);
 
   useEffect(() => {
     if (isMounted) {
@@ -42,6 +71,7 @@ export default function Home() {
   }, [isMounted]);
 
   useEffect(() => {
+    if (!theme) return;
     const root = document.documentElement;
     if (theme.backgroundColor) {
       root.style.setProperty('--background', hexToHslString(theme.backgroundColor));
@@ -77,7 +107,7 @@ export default function Home() {
     setTimeout(() => setProjectsVisible(true), 500);
   };
 
-  if (!isMounted) {
+  if (!isMounted || !theme) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-background">
         <BlinkingCursor />
@@ -189,7 +219,6 @@ export default function Home() {
       <InteractiveTerminal 
         isOpen={isTerminalOpen}
         onOpenChange={setTerminalOpen}
-        openAdminPanel={() => setPanelOpen(true)}
         projects={projects}
         prompt={cliPrompt}
       />

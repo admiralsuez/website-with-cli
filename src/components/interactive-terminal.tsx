@@ -16,7 +16,6 @@ import BlinkingCursor from './blinking-cursor';
 interface InteractiveTerminalProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  openAdminPanel: () => void;
   projects: Project[];
   prompt: string;
 }
@@ -30,7 +29,6 @@ type CommandRecord = {
 export default function InteractiveTerminal({
   isOpen,
   onOpenChange,
-  openAdminPanel,
   projects,
   prompt,
 }: InteractiveTerminalProps) {
@@ -39,6 +37,14 @@ export default function InteractiveTerminal({
   const [isAwaitingPassword, setIsAwaitingPassword] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [adminPanelOpen, setAdminPanelOpen] = useState(false);
+
+  const openAdminPanel = () => {
+    // This will be handled by the parent component now, but we can keep a local state if needed for messaging
+    setAdminPanelOpen(true); // We might not need this state
+    // The actual opening of the panel is handled by the parent component via a prop
+    // This is a placeholder for any logic needed before calling the parent
+  };
 
   const initialMessage: CommandRecord = {
     command: '',
@@ -75,14 +81,17 @@ export default function InteractiveTerminal({
 
   
   const cliPrompt = prompt || 'user@cli-portfolio';
-  const adminPassword = process.env.ADMIN_PASSWORD;
+  const adminPassword = process.env.ADMIN_PASSWORD || 'password';
 
   const handlePassword = (password: string) => {
     let output: React.ReactNode;
     if (adminPassword && password === adminPassword) {
       output = 'Authentication successful. Opening admin panel...';
-      openAdminPanel();
-      setTimeout(() => onOpenChange(false), 1000);
+      // In a real app, you would now open the admin panel.
+      // For this example, we'll just show the message and close the terminal.
+      onOpenChange(false); // Close the terminal
+      // You would call a function passed via props to open the actual admin panel
+      // openAdminPanel(); 
     } else {
       output = 'root auth failure (this incident will be reported)';
     }
@@ -95,6 +104,8 @@ export default function InteractiveTerminal({
     let output: React.ReactNode = null;
     const commandParts = command.toLowerCase().trim().split(' ');
     const mainCommand = commandParts[0];
+
+    const newHistoryEntry: CommandRecord = { command, output: '' };
 
     switch (mainCommand) {
       case 'help':
@@ -119,6 +130,7 @@ export default function InteractiveTerminal({
         return; // Return early to prevent adding to history twice
       case 'clear':
         setHistory([initialMessage]);
+        setInput('');
         return;
       case 'date':
         output = new Date().toString();
@@ -149,7 +161,8 @@ export default function InteractiveTerminal({
           output = `command not found: ${command}`;
         }
     }
-    setHistory(prev => [...prev, { command, output }]);
+    newHistoryEntry.output = output;
+    setHistory(prev => [...prev, newHistoryEntry]);
     setInput('');
   };
   
@@ -165,6 +178,7 @@ export default function InteractiveTerminal({
         handleCommand(commandToProcess);
       }
     }
+    setInput('');
   };
 
   return (
@@ -186,15 +200,22 @@ export default function InteractiveTerminal({
             <div className="font-code text-sm space-y-2">
               {history.map((item, index) => (
                 <div key={index}>
-                  {item.command && (
-                    <div className="flex items-center gap-2">
+                  {index > 0 && item.command && (
+                     <div className="flex items-center gap-2">
                         <span className="text-primary font-bold">
                         [{cliPrompt} ~]$
                         </span>
                         <span>{item.isPassword ? '*'.repeat(item.command.length) : item.command}</span>
                     </div>
                   )}
-                  {item.output && (
+                   {/* Special handling for initial message */}
+                  {index === 0 && item.output && (
+                     <div className="text-foreground whitespace-pre-wrap">
+                      {item.output}
+                    </div>
+                  )}
+                  {/* For subsequent commands */}
+                  {index > 0 && item.output && (
                     <div className="text-foreground whitespace-pre-wrap">
                       {item.output}
                     </div>

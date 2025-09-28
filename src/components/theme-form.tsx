@@ -46,13 +46,44 @@ export default function ThemeForm({
     defaultValues: currentTheme,
   });
 
-  const onSubmit = (data: ThemeFormValues) => {
-    onThemeChange(data);
-    toast({
-      title: 'Theme Updated',
-      description: 'Your new theme has been applied.',
-    });
+  const saveTheme = async (theme: Theme) => {
+    try {
+      const response = await fetch('/api/theme', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(theme),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save theme');
+      }
+      onThemeChange(theme);
+      toast({
+        title: 'Theme Updated',
+        description: 'Your new theme has been applied.',
+      });
+    } catch (error) {
+       console.error(error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save theme.',
+        variant: 'destructive',
+      });
+    }
   };
+
+  const onSubmit = (data: ThemeFormValues) => {
+    saveTheme(data);
+  };
+  
+    // Watch form values to provide a live preview
+  const watchedValues = form.watch();
+  
+  // This is a bit of a hack to apply the preview without triggering a full re-render/save
+  // In a real app, you might debounce this or use a more sophisticated state management
+  const handlePreview = () => {
+    onThemeChange(watchedValues);
+  }
 
   return (
     <div className="space-y-8">
@@ -119,7 +150,7 @@ export default function ThemeForm({
                     <FormItem>
                       <FormLabel>Background Color</FormLabel>
                       <FormControl>
-                        <Input type="color" {...field} className='p-1 h-10'/>
+                        <Input type="color" {...field} className='p-1 h-10' onChangeCapture={handlePreview} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -132,7 +163,7 @@ export default function ThemeForm({
                     <FormItem>
                       <FormLabel>Primary Color</FormLabel>
                       <FormControl>
-                        <Input type="color" {...field} className='p-1 h-10'/>
+                        <Input type="color" {...field} className='p-1 h-10' onChangeCapture={handlePreview} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -145,7 +176,7 @@ export default function ThemeForm({
                     <FormItem>
                       <FormLabel>Accent Color</FormLabel>
                       <FormControl>
-                        <Input type="color" {...field} className='p-1 h-10'/>
+                        <Input type="color" {...field} className='p-1 h-10' onChangeCapture={handlePreview} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
