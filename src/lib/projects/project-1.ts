@@ -11,7 +11,7 @@ import type { Project } from '@/lib/types';
  */
 export const project1: Project = {
   id: '1',
-  name: 'E-commerce Platform',
+  name: 'Shakshuka',
   description:
     'A fully-featured e-commerce platform with a modern, clean interface. Built with Next.js for the frontend and a Node.js/Express backend. Includes features like product search, user authentication, shopping cart, and a Stripe integration for payments.',
   techStack: 'Next.js, TypeScript, Node.js, Stripe',
