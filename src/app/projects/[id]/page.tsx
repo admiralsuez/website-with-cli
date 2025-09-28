@@ -50,15 +50,24 @@ export default function ProjectPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-4 md:p-6 pt-0 flex flex-col gap-6">
-              {project.imageUrl && (
+              {project.mediaPath && (
                 <div className="aspect-video relative overflow-hidden rounded-md border">
-                  <Image
-                    src={project.imageUrl}
-                    alt={project.name || 'Project image'}
-                    fill
-                    className="object-cover"
-                    data-ai-hint="screenshot app"
-                  />
+                  {project.mediaType === 'video' ? (
+                    <video
+                      src={project.mediaPath}
+                      controls
+                      className="w-full h-full object-cover"
+                      data-ai-hint="demo video"
+                    />
+                  ) : (
+                    <Image
+                      src={project.mediaPath}
+                      alt={project.name || 'Project media'}
+                      fill
+                      className="object-cover"
+                      data-ai-hint="screenshot app"
+                    />
+                  )}
                 </div>
               )}
               <p className="text-sm sm:text-base whitespace-pre-line">{project.description}</p>

@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from './ui/checkbox';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 
 const projectSchema = z.object({
   name: z.string().optional(),
@@ -24,7 +25,8 @@ const projectSchema = z.object({
   description: z.string().optional(),
   liveUrl: z.string().url().optional().or(z.literal('')),
   repoUrl: z.string().url().optional().or(z.literal('')),
-  imageUrl: z.string().url().optional().or(z.literal('')),
+  mediaPath: z.string().optional(),
+  mediaType: z.enum(['image', 'video']).optional(),
   hidden: z.boolean().optional(),
 });
 
@@ -44,7 +46,8 @@ export default function ProjectForm({ project, onSave }: ProjectFormProps) {
       description: project?.description ?? '',
       liveUrl: project?.liveUrl ?? '',
       repoUrl: project?.repoUrl ?? '',
-      imageUrl: project?.imageUrl ?? '',
+      mediaPath: project?.mediaPath ?? '',
+      mediaType: project?.mediaType ?? 'image',
       hidden: project?.hidden ?? false,
     },
   });
@@ -104,19 +107,59 @@ export default function ProjectForm({ project, onSave }: ProjectFormProps) {
             </FormItem>
           )}
         />
+        
         <FormField
           control={form.control}
-          name="imageUrl"
+          name="mediaPath"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image URL</FormLabel>
+              <FormLabel>Media Path</FormLabel>
               <FormControl>
-                <Input placeholder="https://example.com/image.gif" {...field} />
+                <Input placeholder="/projects/my-image.png" {...field} />
+              </FormControl>
+              <FormDescription>
+                Path to the image or video file in the `public` folder (e.g., /media/project.mp4).
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="mediaType"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel>Media Type</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="flex flex-col space-y-1"
+                >
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="image" />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Image
+                    </FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="video" />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Video
+                    </FormLabel>
+                  </FormItem>
+                </RadioGroup>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        
         <FormField
           control={form.control}
           name="liveUrl"

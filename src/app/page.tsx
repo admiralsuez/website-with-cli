@@ -89,6 +89,16 @@ export default function Home() {
 
   return (
     <div className="p-4 md:p-8 flex items-center justify-center min-h-screen">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="fixed top-4 right-4 z-10 h-8 w-8"
+        onClick={() => setPanelOpen(true)}
+      >
+        <Cog />
+        <span className="sr-only">Open Admin Panel</span>
+      </Button>
+
       <CliContainer>
         <main className="flex-1 p-4 md:p-6 space-y-8 overflow-y-auto">
           {welcomeVisible && (
@@ -128,10 +138,10 @@ export default function Home() {
                           </CardDescription>
                         </CardHeader>
                         <CardContent className="p-4 pt-0 flex-1 flex flex-col gap-4">
-                          {project.imageUrl && (
+                          {project.mediaPath && (
                             <div className="aspect-video relative overflow-hidden rounded-md">
                               <Image 
-                                src={project.imageUrl} 
+                                src={project.mediaPath} 
                                 alt={project.name || 'Project image'} 
                                 fill
                                 className="object-cover"

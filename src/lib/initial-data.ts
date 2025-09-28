@@ -8,7 +8,8 @@ export const initialProjects: Project[] = [
     techStack: 'Next.js, Tailwind CSS, TypeScript, Firebase',
     liveUrl: '#',
     repoUrl: '#',
-    imageUrl: 'https://picsum.photos/seed/1/600/400'
+    mediaPath: '/projects/alpha.png',
+    mediaType: 'image',
   },
   {
     id: '2',
@@ -17,7 +18,8 @@ export const initialProjects: Project[] = [
     techStack: 'React, Node.js, Express, MongoDB',
     liveUrl: '#',
     repoUrl: '#',
-    imageUrl: 'https://picsum.photos/seed/2/600/400'
+    mediaPath: '/projects/beta.mp4',
+    mediaType: 'video',
   },
   {
     id: '3',
@@ -25,7 +27,8 @@ export const initialProjects: Project[] = [
     description: 'A data visualization tool that turns complex datasets into beautiful, interactive charts and graphs.',
     techStack: 'D3.js, Svelte, Python, Flask',
     repoUrl: '#',
-    imageUrl: 'https://picsum.photos/seed/3/600/400'
+    mediaPath: '/projects/gamma.png',
+    mediaType: 'image',
   },
   {
     id: '4',
@@ -33,7 +36,8 @@ export const initialProjects: Project[] = [
     description: 'A mobile-first social networking application focused on connecting people with shared interests and hobbies.',
     techStack: 'Flutter, Dart, Google Cloud',
     liveUrl: '#',
-    imageUrl: 'https://picsum.photos/seed/4/600/400'
+    mediaPath: '/projects/delta.gif',
+    mediaType: 'image',
   },
 ];
 

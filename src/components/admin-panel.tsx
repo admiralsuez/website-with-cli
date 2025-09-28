@@ -173,7 +173,7 @@ export default function AdminPanel({
               {editingProject ? 'Edit Project' : 'Add New Project'}
             </DialogTitle>
              <DialogDescription>
-              Provide the details for your project. The image URL can be a link to a GIF or a static image.
+              Provide the details for your project. Your media should be placed in the `public` folder.
             </DialogDescription>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto -mx-6">

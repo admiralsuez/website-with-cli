@@ -5,7 +5,8 @@ export type Project = {
   techStack?: string;
   liveUrl?: string;
   repoUrl?: string;
-  imageUrl?: string;
+  mediaPath?: string;
+  mediaType?: 'image' | 'video';
   hidden?: boolean;
 };
 
