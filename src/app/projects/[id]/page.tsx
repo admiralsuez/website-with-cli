@@ -8,50 +8,25 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import BlinkingCursor from '@/components/blinking-cursor';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import type { Project, Theme } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
-
+import type { Project } from '@/lib/types';
+import { theme } from '@/lib/theme';
+import { projects } from '@/lib/projects';
 
 export default function ProjectPage() {
   const params = useParams();
   const projectId = params.id;
-  const { toast } = useToast();
   const [project, setProject] = useState<Project | null>(null);
-  const [theme, setTheme] = useState<Theme | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!projectId) return;
-      try {
-        const [projectRes, themeRes] = await Promise.all([
-          fetch(`/api/projects?id=${projectId}`),
-          fetch('/api/theme'),
-        ]);
-
-        if (!projectRes.ok || !themeRes.ok) {
-          throw new Error('Failed to fetch data');
-        }
-
-        const projectData = await projectRes.json();
-        const themeData = await themeRes.json();
-
-        setProject(projectData);
-        setTheme(themeData);
-      } catch (error) {
-        console.error(error);
-        toast({
-          title: 'Error',
-          description: 'Could not load project data.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
+    if (projectId) {
+      const foundProject = projects.find(p => p.id === projectId);
+      if (foundProject) {
+        setProject(foundProject);
       }
-    };
-
-    fetchData();
-  }, [projectId, toast]);
+      setIsLoading(false);
+    }
+  }, [projectId]);
 
   if (isLoading || !theme) {
     return (

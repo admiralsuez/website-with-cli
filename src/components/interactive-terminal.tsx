@@ -11,7 +11,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from './ui/scroll-area';
 import type { Project } from '@/lib/types';
-import BlinkingCursor from './blinking-cursor';
 
 interface InteractiveTerminalProps {
   isOpen: boolean;
@@ -24,7 +23,6 @@ interface InteractiveTerminalProps {
 type CommandRecord = {
   command: string;
   output: React.ReactNode;
-  isPassword?: boolean;
 };
 
 export default function InteractiveTerminal({
@@ -36,7 +34,6 @@ export default function InteractiveTerminal({
 }: InteractiveTerminalProps) {
   const [history, setHistory] = useState<CommandRecord[]>([]);
   const [input, setInput] = useState('');
-  const [isAwaitingPassword, setIsAwaitingPassword] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   
@@ -64,7 +61,6 @@ export default function InteractiveTerminal({
       }
     } else {
       // Reset state when closed
-      setIsAwaitingPassword(false);
       setInput('');
     }
   }, [isOpen, history.length]);
@@ -75,21 +71,7 @@ export default function InteractiveTerminal({
 
   
   const cliPrompt = prompt || 'user@cli-portfolio';
-  const adminPassword = process.env.ADMIN_PASSWORD;
 
-  const handlePassword = (password: string) => {
-    let output: React.ReactNode;
-    if (adminPassword && password === adminPassword) {
-      output = 'Authentication successful. Opening admin panel...';
-      onOpenChange(false);
-      onAdminLogin();
-    } else {
-      output = 'root auth failure (this incident will be reported)';
-    }
-    setHistory(prev => [...prev, { command: password, output, isPassword: true }]);
-    setIsAwaitingPassword(false);
-  };
-  
   const handleCommand = (command: string) => {
     let output: React.ReactNode = null;
     const commandParts = command.toLowerCase().trim().split(' ');
@@ -104,7 +86,6 @@ export default function InteractiveTerminal({
             <p>Available commands:</p>
             <ul className="list-disc pl-5">
               <li>help - Show this help message</li>
-              <li>admin - Open the admin panel (requires password)</li>
               <li>ls [-a] - List projects (add -a to show hidden)</li>
               <li>clear - Clear the terminal history</li>
               <li>date - Display the current date</li>
@@ -113,10 +94,6 @@ export default function InteractiveTerminal({
           </div>
         );
         break;
-      case 'admin':
-        setIsAwaitingPassword(true);
-        setHistory(prev => [...prev, { command, output: '' }]);
-        return; // Return early to prevent adding to history twice
       case 'clear':
         setHistory([initialMessage]);
         return;
@@ -157,14 +134,10 @@ export default function InteractiveTerminal({
     e.preventDefault();
     const commandToProcess = input.trim();
     setInput('');
-    if (isAwaitingPassword) {
-      handlePassword(commandToProcess);
+    if (commandToProcess === '') {
+      setHistory(prev => [...prev, { command: '', output: '' }]);
     } else {
-       if (commandToProcess === '') {
-        setHistory(prev => [...prev, { command: '', output: '' }]);
-       } else {
-        handleCommand(commandToProcess);
-      }
+      handleCommand(commandToProcess);
     }
   };
 
@@ -187,23 +160,16 @@ export default function InteractiveTerminal({
             <div className="font-code text-sm space-y-2">
               {history.map((item, index) => (
                 <div key={index}>
-                  {index > 0 && (item.command || history[index-1]?.command !== 'admin') && (
+                  {index > 0 && (
                      <div className="flex items-center gap-2">
                         <span className="text-primary font-bold">
                         [{cliPrompt} ~]$
                         </span>
-                        <span>{item.isPassword ? '*'.repeat(item.command.length) : item.command}</span>
+                        <span>{item.command}</span>
                     </div>
                   )}
-                   {/* Special handling for initial message */}
-                  {index === 0 && item.output && (
+                  {item.output && (
                      <div className="text-foreground whitespace-pre-wrap">
-                      {item.output}
-                    </div>
-                  )}
-                  {/* For subsequent commands */}
-                  {index > 0 && item.output && (
-                    <div className="text-foreground whitespace-pre-wrap">
                       {item.output}
                     </div>
                   )}
@@ -211,20 +177,7 @@ export default function InteractiveTerminal({
               ))}
                <div className="flex items-center gap-2">
                 <form onSubmit={handleSubmit} className="flex items-center gap-2 flex-1">
-                    {isAwaitingPassword ? (
-                      <>
-                        <span>Enter password:</span>
-                        <Input
-                            ref={inputRef}
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            type="password"
-                            className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
-                            autoComplete="off"
-                        />
-                      </>
-                    ) : (
-                      <>
+                    <>
                       <span className="text-primary font-bold">
                         [{cliPrompt} ~]$
                       </span>
@@ -236,8 +189,7 @@ export default function InteractiveTerminal({
                           className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
                           autoComplete="off"
                       />
-                      </>
-                    )}
+                    </>
                 </form>
               </div>
             </div>
