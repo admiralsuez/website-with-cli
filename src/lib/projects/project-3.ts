@@ -14,7 +14,7 @@ export const project3: Project = {
   techStack: 'Flutter',
   liveUrl: '',
   repoUrl: '',
-  mediaPath: '/projects/placeholder-3.jpg',
+  mediaPath: '/projects/safe.jpg',
   mediaType: 'image',
   hidden: true,
 };

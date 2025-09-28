@@ -17,7 +17,7 @@ export const project1: Project = {
   techStack: 'Tailwind, React',
   liveUrl: 'https://shakshuka.birbot.tech',
   repoUrl: 'coming soon',
-  mediaPath: '/projects/placeholder-1.jpg',
+  mediaPath: '/projects/shak.jpg',
   mediaType: 'image',
   hidden: false,
 };

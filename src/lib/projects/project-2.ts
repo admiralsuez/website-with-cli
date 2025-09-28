@@ -14,7 +14,7 @@ export const project2: Project = {
   techStack: 'Kotlin, Python',
   liveUrl: 'https://shhh.birbot.tech',
   repoUrl: 'coming soon',
-  mediaPath: '/projects/placeholder-2.jpg',
+  mediaPath: '/projects/shh.jpg',
   mediaType: 'image',
   hidden: false,
 };
