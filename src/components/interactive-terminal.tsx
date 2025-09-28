@@ -24,7 +24,6 @@ interface InteractiveTerminalProps {
 type CommandRecord = {
   command: string;
   output: React.ReactNode;
-  isPasswordPrompt?: boolean;
 };
 
 export default function InteractiveTerminal({
@@ -36,6 +35,7 @@ export default function InteractiveTerminal({
 }: InteractiveTerminalProps) {
   const [history, setHistory] = useState<CommandRecord[]>([]);
   const [input, setInput] = useState('');
+  const [isAwaitingPassword, setIsAwaitingPassword] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -54,29 +54,29 @@ export default function InteractiveTerminal({
       }
     }
   }, []);
-
+  
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
-      if (history.length === 0 || (history.length === 1 && history[0].command === '' && history[0].output === initialMessage.output)) {
+       if (history.length === 0) {
         setHistory([initialMessage]);
       }
+    } else {
+      // Reset state when closed
+      setIsAwaitingPassword(false);
       setInput('');
     }
-  }, [isOpen, history.length, initialMessage.output]);
+  }, [isOpen]);
 
   useEffect(() => {
     scrollToBottom();
   }, [history, scrollToBottom]);
 
-  const lastCommand = history[history.length - 1];
-  const isAwaitingPassword = lastCommand?.isPasswordPrompt;
+  
   const cliPrompt = prompt || 'user@cli-portfolio';
 
   const handleCommand = (command: string) => {
     let output: React.ReactNode;
-    let isPasswordPrompt = false;
-
     const commandParts = command.toLowerCase().trim().split(' ');
     const mainCommand = commandParts[0];
 
@@ -88,7 +88,7 @@ export default function InteractiveTerminal({
             <ul className="list-disc pl-5">
               <li>help - Show this help message</li>
               <li>admin - Open the admin panel (requires password)</li>
-              <li>ls - List visible projects</li>
+              <li>ls [-a] - List projects (add -a to show hidden)</li>
               <li>clear - Clear the terminal history</li>
               <li>date - Display the current date</li>
               <li>echo [text] - Print text to the terminal</li>
@@ -97,9 +97,8 @@ export default function InteractiveTerminal({
         );
         break;
       case 'admin':
-        isPasswordPrompt = true;
-        output = 'Enter password:';
-        setHistory((prev) => [...prev, { command, output: '', isPasswordPrompt: false }, { command: '', output, isPasswordPrompt }]);
+        setIsAwaitingPassword(true);
+        setHistory((prev) => [...prev, { command, output: 'Enter password:' }]);
         return;
       case 'clear':
         setHistory([initialMessage]);
@@ -146,37 +145,21 @@ export default function InteractiveTerminal({
       output = 'root auth failure (this incident will be reported)';
     }
 
-    setHistory((prev) => {
-        const newHistory = [...prev];
-        const lastEntry = newHistory[newHistory.length - 1];
-        if (lastEntry) {
-            lastEntry.output = (
-                <>
-                    {'*'.repeat(password.length)}
-                    <br />
-                    {output}
-                </>
-            );
-            lastEntry.isPasswordPrompt = false; 
-        }
-        return newHistory;
-    });
+    setHistory((prev) => [...prev, { command: '*'.repeat(password.length), output }]);
+    setIsAwaitingPassword(false);
   };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const commandToProcess = input.trim();
-    
+    if (commandToProcess === '') return;
+
     if (isAwaitingPassword) {
       handlePassword(commandToProcess);
     } else {
       handleCommand(commandToProcess);
     }
     setInput('');
-    setTimeout(() => {
-        inputRef.current?.focus();
-        scrollToBottom();
-    }, 0);
   };
 
   return (
@@ -184,18 +167,18 @@ export default function InteractiveTerminal({
       <DialogContent
         className="w-[90vw] max-w-3xl h-[60vh] flex flex-col p-0"
         onInteractOutside={(e) => {
-            // e.preventDefault()
+             e.preventDefault()
         }}
       >
         <DialogHeader className="p-4 border-b">
           <DialogTitle>Interactive Terminal</DialogTitle>
         </DialogHeader>
         <div
-          className="flex-1 p-4 overflow-hidden"
+          className="flex-1 p-4 overflow-y-auto"
           onClick={() => inputRef.current?.focus()}
         >
           <ScrollArea className="h-full" ref={scrollAreaRef}>
-            <div className="font-code text-sm">
+            <div className="font-code text-sm space-y-2">
               {history.map((item, index) => (
                 <div key={index}>
                   {item.command && (
@@ -208,15 +191,7 @@ export default function InteractiveTerminal({
                   )}
                   {item.output && (
                     <div className="text-foreground whitespace-pre-wrap">
-                      {item.isPasswordPrompt ? (
-                        <>
-                          {'*'.repeat(input.length)}
-                          <br/>
-                          {item.output}
-                        </>
-                      ) : (
-                        item.output
-                      )}
+                      {item.output}
                     </div>
                   )}
                 </div>
@@ -224,7 +199,7 @@ export default function InteractiveTerminal({
                <form onSubmit={handleSubmit} className="flex items-center gap-2">
                   {isAwaitingPassword ? (
                     <>
-                      <span>Enter password: </span>
+                      <span>Enter password:</span>
                     </>
                   ) : (
                     <span className="text-primary font-bold">
