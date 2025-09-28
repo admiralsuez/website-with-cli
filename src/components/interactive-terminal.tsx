@@ -99,8 +99,8 @@ export default function InteractiveTerminal({
         break;
       case 'admin':
         setIsAwaitingPassword(true);
-        setHistory((prev) => [...prev, { command, output: 'Enter password:' }]);
-        return;
+        setHistory((prev) => [...prev, { command, output: null }]);
+        return; // Return early to prevent setting history again
       case 'clear':
         setHistory([initialMessage]);
         return;
@@ -155,15 +155,14 @@ export default function InteractiveTerminal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const commandToProcess = input.trim();
-    if (commandToProcess === '') {
-        setHistory(prev => [...prev, { command: '', output: '' }]);
-        return;
-    }
-
     if (isAwaitingPassword) {
       handlePassword(commandToProcess);
     } else {
-      handleCommand(commandToProcess);
+       if (commandToProcess === '') {
+        setHistory(prev => [...prev, { command: '', output: '' }]);
+      } else {
+        handleCommand(commandToProcess);
+      }
     }
     setInput('');
   };
