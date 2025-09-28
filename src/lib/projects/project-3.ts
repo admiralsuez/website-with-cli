@@ -8,12 +8,12 @@ import type { Project } from '@/lib/types';
  */
 export const project3: Project = {
   id: '3',
-  name: 'Portfolio Website',
+  name: 'Remove Trackers',
   description:
-    'A personal portfolio website designed to showcase my projects and skills. This project itself! Built with Next.js and styled with Tailwind CSS, it features a command-line interface aesthetic. It is fully responsive and includes an admin panel for content management.',
-  techStack: 'Next.js, TypeScript, Tailwind CSS',
+    'A flutter app which removes all trackers from links that you share',
+  techStack: 'Flutter',
   liveUrl: '',
-  repoUrl: 'https://github.com/example/repo',
+  repoUrl: '',
   mediaPath: '/projects/placeholder-3.jpg',
   mediaType: 'image',
   hidden: true,

@@ -14,7 +14,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import InteractiveTerminal from '@/components/interactive-terminal';
 
 export default function Home() {
-  const [isPanelOpen, setPanelOpen] = useState(false);
   const [isTerminalOpen, setTerminalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -168,7 +167,6 @@ export default function Home() {
         onOpenChange={setTerminalOpen}
         projects={projects}
         prompt={cliPrompt}
-        onAdminLogin={() => {}}
       />
     </div>
   );

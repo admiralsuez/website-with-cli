@@ -24,7 +24,7 @@ This portfolio uses a code-driven approach for content management, making it fas
 
 ### Editing the Theme
 
-To change the site's colors, fonts, or welcome messages, edit the file at `src/lib/theme.ts`.
+To change the site's colors, fonts, or welcome messages, edit the file at `src/lib/theme.ts`. All user-configurable values are in this file with comments explaining what they do.
 
 ### Editing Projects
 

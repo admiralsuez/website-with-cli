@@ -2,13 +2,19 @@ import type { Theme } from './types';
 
 /**
  * Edit this file to change the theme of your portfolio.
+ * This includes colors, fonts, and the text that appears in the terminal.
  */
 export const theme: Theme = {
-  primaryColor: '#2F4F4F',
-  backgroundColor: '#1A1A1A',
-  accentColor: '#32CD32',
-  font: 'Space Grotesk',
-  welcomeMessage: 'welcome-to-my-portfolio',
-  prompt: 'user@cli-portfolio',
-  loadingCommand: 'ls projects',
+  // --- Color Scheme ---
+  primaryColor: '#2F4F4F', // Used for borders, highlights, and the cursor
+  backgroundColor: '#1A1A1A', // The main background of the terminal
+  accentColor: '#32CD32', // The primary text color
+
+  // --- Typography ---
+  font: 'Space Grotesk', // The font for the entire site
+
+  // --- Terminal Text ---
+  welcomeMessage: 'welcome-to-my-portfolio', // The message that appears on page load
+  prompt: 'user@cli-portfolio', // The command line prompt (e.g., user@host)
+  loadingCommand: 'ls projects', // The command that appears to "run" to show projects
 };

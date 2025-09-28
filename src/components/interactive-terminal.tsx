@@ -17,7 +17,6 @@ interface InteractiveTerminalProps {
   onOpenChange: (isOpen: boolean) => void;
   projects: Project[];
   prompt: string;
-  onAdminLogin: () => void;
 }
 
 type CommandRecord = {
@@ -30,7 +29,6 @@ export default function InteractiveTerminal({
   onOpenChange,
   projects,
   prompt,
-  onAdminLogin,
 }: InteractiveTerminalProps) {
   const [history, setHistory] = useState<CommandRecord[]>([]);
   const [input, setInput] = useState('');
