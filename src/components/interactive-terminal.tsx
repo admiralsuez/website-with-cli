@@ -18,6 +18,7 @@ interface InteractiveTerminalProps {
   onOpenChange: (isOpen: boolean) => void;
   projects: Project[];
   prompt: string;
+  onAdminLogin: () => void;
 }
 
 type CommandRecord = {
@@ -31,21 +32,14 @@ export default function InteractiveTerminal({
   onOpenChange,
   projects,
   prompt,
+  onAdminLogin,
 }: InteractiveTerminalProps) {
   const [history, setHistory] = useState<CommandRecord[]>([]);
   const [input, setInput] = useState('');
   const [isAwaitingPassword, setIsAwaitingPassword] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const [adminPanelOpen, setAdminPanelOpen] = useState(false);
-
-  const openAdminPanel = () => {
-    // This will be handled by the parent component now, but we can keep a local state if needed for messaging
-    setAdminPanelOpen(true); // We might not need this state
-    // The actual opening of the panel is handled by the parent component via a prop
-    // This is a placeholder for any logic needed before calling the parent
-  };
-
+  
   const initialMessage: CommandRecord = {
     command: '',
     output: 'Welcome to the interactive terminal. Type "help" for a list of commands.',
@@ -87,17 +81,13 @@ export default function InteractiveTerminal({
     let output: React.ReactNode;
     if (adminPassword && password === adminPassword) {
       output = 'Authentication successful. Opening admin panel...';
-      // In a real app, you would now open the admin panel.
-      // For this example, we'll just show the message and close the terminal.
-      onOpenChange(false); // Close the terminal
-      // You would call a function passed via props to open the actual admin panel
-      // openAdminPanel(); 
+      onOpenChange(false);
+      onAdminLogin();
     } else {
       output = 'root auth failure (this incident will be reported)';
     }
     setHistory(prev => [...prev, { command: password, output, isPassword: true }]);
     setIsAwaitingPassword(false);
-    setInput('');
   };
   
   const handleCommand = (command: string) => {
@@ -126,11 +116,9 @@ export default function InteractiveTerminal({
       case 'admin':
         setIsAwaitingPassword(true);
         setHistory(prev => [...prev, { command, output: '' }]);
-        setInput('');
         return; // Return early to prevent adding to history twice
       case 'clear':
         setHistory([initialMessage]);
-        setInput('');
         return;
       case 'date':
         output = new Date().toString();
@@ -163,12 +151,12 @@ export default function InteractiveTerminal({
     }
     newHistoryEntry.output = output;
     setHistory(prev => [...prev, newHistoryEntry]);
-    setInput('');
   };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const commandToProcess = input.trim();
+    setInput('');
     if (isAwaitingPassword) {
       handlePassword(commandToProcess);
     } else {
@@ -178,7 +166,6 @@ export default function InteractiveTerminal({
         handleCommand(commandToProcess);
       }
     }
-    setInput('');
   };
 
   return (
@@ -200,7 +187,7 @@ export default function InteractiveTerminal({
             <div className="font-code text-sm space-y-2">
               {history.map((item, index) => (
                 <div key={index}>
-                  {index > 0 && item.command && (
+                  {index > 0 && (item.command || history[index-1]?.command !== 'admin') && (
                      <div className="flex items-center gap-2">
                         <span className="text-primary font-bold">
                         [{cliPrompt} ~]$

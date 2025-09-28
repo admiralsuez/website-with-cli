@@ -221,6 +221,7 @@ export default function Home() {
         onOpenChange={setTerminalOpen}
         projects={projects}
         prompt={cliPrompt}
+        onAdminLogin={() => setPanelOpen(true)}
       />
     </div>
   );
