@@ -2,6 +2,12 @@
 
 This guide provides step-by-step instructions for deploying your CLI Portfolio application to your own server.
 
+**IMPORTANT NOTE ON DATA PERSISTENCE:** This application saves your project and theme data to JSON files in the `public/data` directory. This approach requires a hosting environment with a **persistent filesystem**, such as a traditional Virtual Private Server (VPS) or a dedicated server.
+
+Many modern hosting platforms (like Vercel, Netlify, and Firebase App Hosting) use an **ephemeral filesystem**. This means that any changes made to the files on the server after deployment will be lost when the server restarts or goes to sleep. If you use one of these platforms, **your content will disappear** after you add it through the Admin Panel.
+
+For production use on these platforms, you would need to modify the application to use a database (e.g., Firebase Firestore, Supabase, etc.) for data storage. The current file-based system is designed for simplicity on servers where you have direct control over the filesystem.
+
 ## Prerequisites
 
 Before you begin, ensure your server has the following installed:

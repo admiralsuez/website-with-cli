@@ -1,97 +1,35 @@
-# Deploying Your Next.js Application
+# CLI Portfolio
 
-This guide provides step-by-step instructions for deploying your CLI Portfolio application to your own server.
+This is a Next.js-based portfolio designed to look and feel like a command-line interface. It includes an admin panel for managing projects and customizing the theme.
 
-## Prerequisites
+## Getting Started
 
-Before you begin, ensure your server has the following installed:
-
-- **Node.js** (version 18.x or later is recommended)
-- **npm** (which comes with Node.js)
-
-You can check your Node.js version by running `node -v` on your server.
-
-## Deployment Steps
-
-Follow these steps to get your application running in a production environment.
-
-### 1. Build the Application
-
-First, you need to create a production-ready build of your application. On your local machine (or on the server if you're pulling the code directly), run the following command:
+First, install the dependencies:
 
 ```bash
-npm run build
+npm install
 ```
 
-This command compiles your application and creates an optimized build in the `.next` directory.
-
-### 2. Transfer Files to Your Server
-
-Next, you need to copy the necessary files to your server. You can use tools like `scp`, `rsync`, or a Git-based workflow. The essential files and directories you need to transfer are:
-
-- `.next/` (the production build)
-- `public/` (contains your uploaded media and data files)
-- `node_modules/`
-- `package.json`
-- `next.config.ts`
-
-A common practice is to copy the entire project directory to the server.
-
-### 3. Install Production Dependencies
-
-Once the files are on your server, navigate to the project directory and install only the dependencies required for production. This is more efficient than installing all the development dependencies.
+Then, run the development server:
 
 ```bash
-npm install --production
+npm run dev
 ```
 
-### 4. Set Environment Variables
+Open [http://localhost:9002](http://localhost:9002) with your browser to see the result.
 
-Your application uses an environment variable for the admin password. You need to set this on your server.
+## Admin Panel
 
-Create a file named `.env.local` in the root of your project directory and add the following line, replacing `your_secure_password` with a password of your choice:
+You can access the admin panel by opening the interactive terminal (click on the command prompt at the bottom) and typing `admin`.
+
+The default password is set as an environment variable. For local development, create a `.env.local` file in the root of the project and add:
 
 ```
-ADMIN_PASSWORD=your_secure_password
+ADMIN_PASSWORD=password
 ```
 
-**Note:** For security reasons, do not commit the `.env.local` file to your version control system (e.g., Git).
+## Deployment
 
-### 5. Start the Application
+Please see the `DEPLOYMENT.md` file for detailed instructions on how to deploy this application to your own server.
 
-Now you can start the Next.js production server. Run the following command:
-
-```bash
-npm run start
-```
-
-By default, the application will start on port 3000. You can specify a different port if needed:
-
-```bash
-npm run start -- -p 8080
-```
-
-### 6. (Recommended) Use a Process Manager
-
-For a real production environment, running `npm run start` directly is not ideal because the process will stop if you close your terminal or if it crashes.
-
-It's highly recommended to use a process manager like **`pm2`** to keep your application running continuously.
-
-**Installing pm2:**
-
-```bash
-npm install pm2 -g
-```
-
-**Starting your app with pm2:**
-
-```bash
-pm2 start npm --name "cli-portfolio" -- run start
-```
-
-This command will:
-- Start your application in the background.
-- Automatically restart it if it crashes.
-- Allow you to manage logs and monitor the process.
-
-You can manage your app with commands like `pm2 list`, `pm2 logs`, and `pm2 stop cli-portfolio`.
+**IMPORTANT NOTE ON DATA PERSISTENCE:** This application saves your project and theme data to JSON files in the `public/data` directory. This approach requires a hosting environment with a **persistent filesystem** (like a traditional VPS). It will **not** work correctly on hosting platforms with an ephemeral filesystem (like Vercel, Netlify, or Firebase App Hosting), as your data will be lost on server restarts.
