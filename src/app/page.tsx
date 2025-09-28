@@ -117,9 +117,9 @@ export default function Home() {
               </div>
               
               {projectsVisible && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 animate-in fade-in duration-500">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 animate-in fade-in duration-500">
                   {projects.filter(p => !p.hidden).map((project) => (
-                    <Link href={`/projects/${project.id}`} key={project.id} className="no-underline">
+                    <Link href={`/projects/${project.id}`} key={project.id} className="no-underline" prefetch={false}>
                       <Card className="bg-card/50 hover:bg-card/90 transition-colors flex flex-col h-full">
                         <CardHeader className="p-4">
                           <CardTitle className="text-primary text-base sm:text-lg">{project.name}</CardTitle>

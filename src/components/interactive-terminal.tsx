@@ -75,10 +75,11 @@ export default function InteractiveTerminal({
 
   
   const cliPrompt = prompt || 'user@cli-portfolio';
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
   const handlePassword = (password: string) => {
     let output: React.ReactNode;
-    if (password === 'rooted@89') {
+    if (adminPassword && password === adminPassword) {
       output = 'Authentication successful. Opening admin panel...';
       openAdminPanel();
       setTimeout(() => onOpenChange(false), 1000);
@@ -113,7 +114,9 @@ export default function InteractiveTerminal({
         break;
       case 'admin':
         setIsAwaitingPassword(true);
-        break;
+        setHistory(prev => [...prev, { command, output: '' }]);
+        setInput('');
+        return; // Return early to prevent adding to history twice
       case 'clear':
         setHistory([initialMessage]);
         return;
@@ -198,35 +201,37 @@ export default function InteractiveTerminal({
                   )}
                 </div>
               ))}
-               <form onSubmit={handleSubmit} className="flex items-center gap-2">
-                  {isAwaitingPassword ? (
-                    <>
-                      <span>Enter password:</span>
+               <div className="flex items-center gap-2">
+                <form onSubmit={handleSubmit} className="flex items-center gap-2 flex-1">
+                    {isAwaitingPassword ? (
+                      <>
+                        <span>Enter password:</span>
+                        <Input
+                            ref={inputRef}
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            type="password"
+                            className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                            autoComplete="off"
+                        />
+                      </>
+                    ) : (
+                      <>
+                      <span className="text-primary font-bold">
+                        [{cliPrompt} ~]$
+                      </span>
                       <Input
                           ref={inputRef}
                           value={input}
                           onChange={(e) => setInput(e.target.value)}
-                          type="password"
+                          type="text"
                           className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
                           autoComplete="off"
                       />
-                    </>
-                  ) : (
-                    <>
-                    <span className="text-primary font-bold">
-                      [{cliPrompt} ~]$
-                    </span>
-                    <Input
-                        ref={inputRef}
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        type="text"
-                        className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
-                        autoComplete="off"
-                    />
-                    </>
-                  )}
-               </form>
+                      </>
+                    )}
+                </form>
+              </div>
             </div>
           </ScrollArea>
         </div>
