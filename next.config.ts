@@ -33,6 +33,11 @@ const nextConfig: NextConfig = {
   env: {
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
   },
+  api: {
+    bodyParser: {
+      sizeLimit: '4mb', // Set desired size limit here
+    },
+  },
 };
 
 export default nextConfig;

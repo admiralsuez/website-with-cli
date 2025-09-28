@@ -17,7 +17,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from './ui/checkbox';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 const projectSchema = z.object({
   name: z.string().optional(),
@@ -38,6 +39,9 @@ interface ProjectFormProps {
 }
 
 export default function ProjectForm({ project, onSave }: ProjectFormProps) {
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
+
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
@@ -51,6 +55,38 @@ export default function ProjectForm({ project, onSave }: ProjectFormProps) {
       hidden: project?.hidden ?? false,
     },
   });
+
+  const handleFileUpload = async (file: File) => {
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const { path } = await response.json();
+      form.setValue('mediaPath', path);
+      form.setValue('mediaType', file.type.startsWith('video') ? 'video' : 'image');
+      toast({ title: 'Success', description: 'File uploaded successfully.' });
+    } catch (error) {
+      console.error('File upload error:', error);
+      toast({
+        title: 'Error',
+        description: 'File upload failed. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
 
   const onSubmit = (data: ProjectFormValues) => {
     onSave({
@@ -113,48 +149,28 @@ export default function ProjectForm({ project, onSave }: ProjectFormProps) {
           name="mediaPath"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Media Path</FormLabel>
+              <FormLabel>Project Media</FormLabel>
               <FormControl>
-                <Input placeholder="/projects/my-image.png" {...field} />
+                <Input 
+                  type="file"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      handleFileUpload(e.target.files[0]);
+                    }
+                  }}
+                  className='pt-2'
+                  disabled={isUploading}
+                 />
               </FormControl>
-              <FormDescription>
-                Path to the image or video file in the `public` folder (e.g., /media/project.mp4).
+              {isUploading && <p className="text-sm text-muted-foreground">Uploading...</p>}
+              {field.value && !isUploading && (
+                <FormDescription>
+                  Current file: {field.value}. Upload a new file to replace it.
+                </FormDescription>
+              )}
+               <FormDescription>
+                  Upload an image or video for your project.
               </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="mediaType"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel>Media Type</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="flex flex-col space-y-1"
-                >
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="image" />
-                    </FormControl>
-                    <FormLabel className="font-normal">
-                      Image
-                    </FormLabel>
-                  </FormItem>
-                  <FormItem className="flex items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <RadioGroupItem value="video" />
-                    </FormControl>
-                    <FormLabel className="font-normal">
-                      Video
-                    </FormLabel>
-                  </FormItem>
-                </RadioGroup>
-              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -208,7 +224,7 @@ export default function ProjectForm({ project, onSave }: ProjectFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit">
+        <Button type="submit" disabled={isUploading}>
           {project ? 'Save Changes' : 'Create Project'}
         </Button>
       </form>

@@ -173,7 +173,7 @@ export default function AdminPanel({
               {editingProject ? 'Edit Project' : 'Add New Project'}
             </DialogTitle>
              <DialogDescription>
-              Provide the details for your project. Your media should be placed in the `public` folder.
+              Provide the details for your project. Your media will be uploaded to the server.
             </DialogDescription>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto -mx-6">
