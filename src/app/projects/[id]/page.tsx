@@ -9,16 +9,15 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import BlinkingCursor from '@/components/blinking-cursor';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import type { Theme } from '@/lib/types';
+import type { Project, Theme } from '@/lib/types';
 
 export default function ProjectPage() {
-  const router = useRouter();
   const params = useParams();
   const projectId = params.id;
-  const [theme] = useState<Theme>(initialTheme);
-
+  
   // In a real app, you'd fetch this from a persistent store
   const project = initialProjects.find((p) => p.id === projectId);
+  const theme = initialTheme;
   
   const cliPrompt = theme.prompt || 'user@cli-portfolio';
 

@@ -24,6 +24,7 @@ interface InteractiveTerminalProps {
 type CommandRecord = {
   command: string;
   output: React.ReactNode;
+  isPassword?: boolean;
 };
 
 export default function InteractiveTerminal({
@@ -66,7 +67,7 @@ export default function InteractiveTerminal({
       setIsAwaitingPassword(false);
       setInput('');
     }
-  }, [isOpen]);
+  }, [isOpen, history.length]);
 
   useEffect(() => {
     scrollToBottom();
@@ -75,8 +76,22 @@ export default function InteractiveTerminal({
   
   const cliPrompt = prompt || 'user@cli-portfolio';
 
-  const handleCommand = (command: string) => {
+  const handlePassword = (password: string) => {
     let output: React.ReactNode;
+    if (password === 'rooted@89') {
+      output = 'Authentication successful. Opening admin panel...';
+      openAdminPanel();
+      setTimeout(() => onOpenChange(false), 1000);
+    } else {
+      output = 'root auth failure (this incident will be reported)';
+    }
+    setHistory(prev => [...prev, { command: password, output, isPassword: true }]);
+    setIsAwaitingPassword(false);
+    setInput('');
+  };
+  
+  const handleCommand = (command: string) => {
+    let output: React.ReactNode = null;
     const commandParts = command.toLowerCase().trim().split(' ');
     const mainCommand = commandParts[0];
 
@@ -95,18 +110,15 @@ export default function InteractiveTerminal({
             </ul>
           </div>
         );
-        setHistory((prev) => [...prev, { command, output }]);
         break;
       case 'admin':
         setIsAwaitingPassword(true);
-        setHistory((prev) => [...prev, { command, output: null }]);
-        return; // Return early to prevent setting history again
+        break;
       case 'clear':
         setHistory([initialMessage]);
         return;
       case 'date':
         output = new Date().toString();
-        setHistory((prev) => [...prev, { command, output }]);
         break;
       case 'ls':
         const showHidden = commandParts.includes('-a');
@@ -126,7 +138,6 @@ export default function InteractiveTerminal({
             ))}
           </ul>
         );
-        setHistory((prev) => [...prev, { command, output }]);
         break;
       default:
         if (mainCommand === 'echo') {
@@ -134,22 +145,9 @@ export default function InteractiveTerminal({
         } else if (command) {
           output = `command not found: ${command}`;
         }
-         setHistory((prev) => [...prev, { command, output }]);
     }
-  };
-  
-  const handlePassword = (password: string) => {
-    let output: React.ReactNode;
-    if (password === 'rooted@89') {
-      output = 'Authentication successful. Opening admin panel...';
-      openAdminPanel();
-      setTimeout(() => onOpenChange(false), 1000);
-    } else {
-      output = 'root auth failure (this incident will be reported)';
-    }
-
-    setHistory((prev) => [...prev, { command: '*'.repeat(password.length), output }]);
-    setIsAwaitingPassword(false);
+    setHistory(prev => [...prev, { command, output }]);
+    setInput('');
   };
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -160,11 +158,10 @@ export default function InteractiveTerminal({
     } else {
        if (commandToProcess === '') {
         setHistory(prev => [...prev, { command: '', output: '' }]);
-      } else {
+       } else {
         handleCommand(commandToProcess);
       }
     }
-    setInput('');
   };
 
   return (
@@ -191,7 +188,7 @@ export default function InteractiveTerminal({
                         <span className="text-primary font-bold">
                         [{cliPrompt} ~]$
                         </span>
-                        <span>{item.command}</span>
+                        <span>{item.isPassword ? '*'.repeat(item.command.length) : item.command}</span>
                     </div>
                   )}
                   {item.output && (
@@ -205,20 +202,30 @@ export default function InteractiveTerminal({
                   {isAwaitingPassword ? (
                     <>
                       <span>Enter password:</span>
+                      <Input
+                          ref={inputRef}
+                          value={input}
+                          onChange={(e) => setInput(e.target.value)}
+                          type="password"
+                          className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                          autoComplete="off"
+                      />
                     </>
                   ) : (
+                    <>
                     <span className="text-primary font-bold">
                       [{cliPrompt} ~]$
                     </span>
+                    <Input
+                        ref={inputRef}
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        type="text"
+                        className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
+                        autoComplete="off"
+                    />
+                    </>
                   )}
-                  <Input
-                      ref={inputRef}
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      type={isAwaitingPassword ? 'password' : 'text'}
-                      className="flex-1 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-auto"
-                      autoComplete="off"
-                  />
                </form>
             </div>
           </ScrollArea>
